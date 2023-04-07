@@ -7,9 +7,10 @@ export default {
         feeds: 'Фиды',
         posts: 'Посты',
         announcement: "Начните читать RSS сегодня! Это легко, это красиво.",
-        rssAggregator: 'RSS Агрегатор',
+        rssAggregator: 'RSS агрегатор',
         feedbackPositive: 'RSS успешно загружен',
         feedbackNegative: 'Ссылка должна быть валидным URL',
         view: 'Просмотр',
+        fullArticle: 'Читать полностью',
     }
 }

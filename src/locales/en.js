@@ -11,5 +11,6 @@ export default {
         feedbackPositive: 'RSS loaded successfully',
         feedbackNegative: 'Link must be a valid URL',
         view: 'View',
+        fullArticle: 'Read full article',
     }
 }
