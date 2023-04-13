@@ -41,59 +41,50 @@ const renderFeeds = (state, i18Inst) => {
 
 const render = (state, i18Inst, elements, path = '') => {
     if (path.startsWith('form')) {
-        if (state.form.error) {
-            //elements.feedbackMessage.style.color = '#0xFF0000';
-            elements.feedbackMessage.textContent = i18Inst.t('feedbackNegative');
-        }
         if (state.form.feedbackMessage) {
             elements.feedbackMessage.textContent = i18Inst.t(state.form.feedbackMessage);
-            if (state.form.feedbackMessage === 'Success!') {
-                elements.feedbackMessage.style.color = '#00FF00';
-                console.log('COLOR: ', elements.feedbackMessage.style.color);
-                //выбор класса в зависимости от ситуации
+            if ( state.form.feedbackMessage instanceof Error || state.form.feedbackMessage === "Can't be loaded!") {
+                elements.feedbackMessage.classList.remove('text-success');
+                elements.feedbackMessage.classList.add('text-danger');
+                elements.feedbackMessage.textContent = i18Inst.t('feedbackNegative');
+            }
+            else if (state.form.feedbackMessage === 'Success!') {
                 elements.feedbackMessage.classList.remove('text-danger');
                 elements.feedbackMessage.classList.add('text-success');
                 elements.feedbackMessage.textContent = i18Inst.t('feedbackPositive');
-            }
-            if (state.form.feedbackMessage === "Can't be loaded!"){
-                elements.feedbackMessage.textContent = i18Inst.t('feedbackNegative');
             }
         } else {
             elements.feedbackMessage.textContent = '';
         }
     }
-    //  elements.feedbackMessage.textContent = i18Inst.t('');
-    //если path начинается со слова form, то независимо от того, что изменилось, обрабатывается и то, и другое
-    // if (path.startsWith('feeds')) {
-    elements.feeds.innerHTML = '';
-    elements.feeds.innerHTML = renderFeeds(state, i18Inst);
-    // }
-    // if (path.startsWith('feeds')) {
-    elements.posts.innerHTML = '';
-    elements.posts.innerHTML = renderPosts(state, i18Inst);
-    elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
-    console.log('state.posts: ', state.posts);
-    const renderedPosts = document.querySelectorAll('.post-item');
-    if (renderedPosts.length > 0) {
-        renderedPosts.forEach((renderedPost) => {
-            renderedPost.querySelector('button').addEventListener('click', () => {
-                changeActivePost(state, renderedPost.getAttribute("id"));
-                setPostAsViewed(state, renderedPost.getAttribute("id"));
-                render(state, i18Inst, elements, path);
-            });
-        })
-    }
-    const activePost = state.posts.find((post) => post.postId === state.modal.activePostId);
-    console.log('state.modal.activePostId: ', state.modal.activePostId);
-    console.log('post: ', activePost);
-    console.log('posts (for comparison): ', state.posts);
-    if (activePost) {
-        console.log('FOUND active post in posts array!');
-        const {title, description, postLink} = activePost;
-        elements.modalHeader.innerHTML = title;
-        elements.modalBody.innerHTML = description;
-        elements.fullArticle.setAttribute('href', postLink);
-    }
+     if (path.startsWith('feeds')) {
+        elements.feeds.innerHTML = '';
+        elements.feeds.innerHTML = renderFeeds(state, i18Inst);
+     }
+     if (path.startsWith('posts')) {
+         elements.posts.innerHTML = '';
+         elements.posts.innerHTML = renderPosts(state, i18Inst);
+         elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
+         console.log('state.posts: ', state.posts);
+         const renderedPosts = document.querySelectorAll('.post-item');
+         if (renderedPosts.length > 0) {
+             renderedPosts.forEach((renderedPost) => {
+                 renderedPost.querySelector('button').addEventListener('click', () => {
+                     changeActivePost(state, renderedPost.getAttribute("id"));
+                     setPostAsViewed(state, renderedPost.getAttribute("id"));
+                     render(state, i18Inst, elements, path);
+                 });
+             })
+         }
+         const activePost = state.posts.find((post) => post.postId === state.modal.activePostId);
+         if (activePost) {
+             console.log('FOUND active post in posts array!');
+             const {title, description, postLink} = activePost;
+             elements.modalHeader.innerHTML = title;
+             elements.modalBody.innerHTML = description;
+             elements.fullArticle.setAttribute('href', postLink);
+         }
+     }
 }
 
 export default (state, i18Inst, elements) => {
@@ -101,4 +92,3 @@ export default (state, i18Inst, elements) => {
         render(state, i18Inst, elements, path);
     })
 };
-//render (и onChange) в этом же файле

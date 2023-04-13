@@ -37,6 +37,7 @@ const parseRss = (data, state) => {
     const rssDOM = parser.parseFromString(data.contents, "text/xml");
     const errorNode = rssDOM.querySelector("parsererror");
     if (errorNode) {
+        state.form.feedbackMessage = "Can't be loaded!";
         throw new Error('Incorrect document type');
     }
     const channel = rssDOM.querySelector('channel');
@@ -61,9 +62,6 @@ const parseRss = (data, state) => {
 
 //запуск периодической загрузки обновлений
 const startRegularUpdate = (state) => {
-    //Если фидов несколько и один падает с ошибкой - обновление не прекращается
-    //Другой фид отвечает с таймаутом 20 секунд - дать закончить работу (каждые 5 сек не выполнять запрос)
-    //Загрузка после проверки (then, catch, Promise.All, finally, Promise.allSettled)
     const checkFeeds = () => {
         console.log('Testing checkFeeds');
         if (state.feeds.length < 1) {
@@ -94,8 +92,16 @@ const loadFeed = (link, state) => {
             state.form.feedbackMessage = "Can't be loaded!";
             throw new Error("Can't be loaded!");
         })
+        .catch((error) => {
+            state.form.feedbackMessage = error;
+            throw (error);
+            }
+        )
         .then(data => {
-            //Обработка ошибок DOM Parser
+            if (!data.contents) {
+                state.form.feedbackMessage = "Can't be loaded!";
+                return;
+            }
             const {title, feedId, desc, posts} = parseRss(data, state);
             if (state.feeds.filter((feed) => feed.link === link).length === 0){
                 state.feeds.push({feedId, title: title.textContent, desc: desc.textContent, link});
@@ -166,7 +172,6 @@ const main = async () => {
 
     })
     startRegularUpdate(state);
-    //render(state, i18Inst, elements);
 }
 
 main();

@@ -11,6 +11,15 @@
         "sourceType": "module"
     },
     "rules": {
+        "no-console": 0,
+        "import/extensions": 0,
+        "fp/no-nil": 0,
+        "fp/no-unused-expression": 0,
+        "fp/no-throw": 0
+        /*"fp/no-mutating-methods":
+        error,
+        - allowedObjects:
+        - "_"*/
     }
 }
 //настройки из автотестов

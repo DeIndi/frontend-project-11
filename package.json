@@ -34,8 +34,8 @@
     "os": false,
     "path": false
   },
-  "name": "my-webpack-project",
-  "description": "My webpack project",
+  "name": "RSS Loader",
+  "description": "RSS Loader",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
