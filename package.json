@@ -34,8 +34,8 @@
     "os": false,
     "path": false
   },
-  "name": "RSS Loader",
-  "description": "RSS Loader",
+  "name": "@hexlet/code",
+  "description": "My webpack project",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
