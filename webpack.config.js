@@ -6,7 +6,6 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const isProduction = process.env.NODE_ENV == 'production';
 
 
 const config = {
@@ -54,10 +53,6 @@ const config = {
 };
 
 export default () => {
-    if (isProduction) {
-        config.mode = 'production';
-    } else {
-        config.mode = 'development';
-    }
+    config.mode = 'development';
     return config;
 };

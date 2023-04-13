@@ -1,10 +1,9 @@
-const changeActivePost = (postId, state) => {
+const changeActivePost = (state, postId) => {
     state.modal.activePostId = postId;
 }
 
-const setPostAsViewed = (state, postId) => {
-    state.uiState.posts[postId] = 'viewed';
-    console.log('UI STATE: ',state.uiState);
+const setPostAsViewed = (state, id) => {
+    state.uiState.posts[id] = 'viewed';
 }
 
 const renderPosts = (state, i18Inst) => {
@@ -24,39 +23,41 @@ const renderPosts = (state, i18Inst) => {
     </li>`).join('')}
     </ul>
     </div>`)
-    //делегирование одиин обработчик
 }
 
 const renderFeeds = (state, i18Inst) => {
     if (!state.currentFeedTitle || !state.currentFeedDesc) {
         return null;
     }
-    return (`<div className="card border-0">
-            <div className="card-body"><h2 className="card-title h4">${i18Inst.t('feeds')}</h2></div>
-            <ul className="list-group border-0 rounded-0">
-            ${state.feeds.map(({title, desc}) => `<li className="list-group-item border-0 border-end-0"><h3 className="h6 m-0">${title}</h3>
-                <p className="m-0 small text-black-50">${desc}</p></li>`
+    return (`<div class="card border-0">
+            <div class="card-body"><h2 class="card-title h4">${i18Inst.t('feeds')}</h2></div>
+            <ul class="list-group border-0 rounded-0">
+            ${state.feeds.map(({title, desc}) => `<li class="list-group-item border-0 border-end-0"><h3 class="h6 m-0">${title}</h3>
+                <p class="m-0 small text-black-50">${desc}</p></li>`
     ).join('')}
             </ul>
         </div>`);
 }
 
 const render = (state, i18Inst, elements, path = '') => {
-    console.log('PATH (from render): ', path);
-    //выделить в отдельную функцию
-    //первый уровень - диспетчеризация
-    //второй уровень - рендер части
     if (path.startsWith('form')) {
         if (state.form.error) {
-            elements.feedbackMessage.style.color = '#0xFF0000';
+            //elements.feedbackMessage.style.color = '#0xFF0000';
             elements.feedbackMessage.textContent = i18Inst.t('feedbackNegative');
-        } else {
-            // elements.feedbackMessage.style.color = '#0x00FF00';
-            // elements.feedbackMessage.textContent = i18Inst.t('feedbackPositive');
         }
         if (state.form.feedbackMessage) {
             elements.feedbackMessage.textContent = i18Inst.t(state.form.feedbackMessage);
-            //корректная строка
+            if (state.form.feedbackMessage === 'Success!') {
+                elements.feedbackMessage.style.color = '#00FF00';
+                console.log('COLOR: ', elements.feedbackMessage.style.color);
+                //выбор класса в зависимости от ситуации
+                elements.feedbackMessage.classList.remove('text-danger');
+                elements.feedbackMessage.classList.add('text-success');
+                elements.feedbackMessage.textContent = i18Inst.t('feedbackPositive');
+            }
+            if (state.form.feedbackMessage === "Can't be loaded!"){
+                elements.feedbackMessage.textContent = i18Inst.t('feedbackNegative');
+            }
         } else {
             elements.feedbackMessage.textContent = '';
         }
@@ -76,7 +77,8 @@ const render = (state, i18Inst, elements, path = '') => {
     if (renderedPosts.length > 0) {
         renderedPosts.forEach((renderedPost) => {
             renderedPost.querySelector('button').addEventListener('click', () => {
-                changeActivePost(renderedPost.getAttribute("id"), state);
+                changeActivePost(state, renderedPost.getAttribute("id"));
+                setPostAsViewed(state, renderedPost.getAttribute("id"));
                 render(state, i18Inst, elements, path);
             });
         })

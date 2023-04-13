@@ -4,6 +4,7 @@ import * as yup from 'yup';
 import onChange from 'on-change';
 import i18n from 'i18next';
 import resources from './locales/locale.js';
+import axios from 'axios';
 import view from './view.js'
 import _ from 'lodash'
 
@@ -55,39 +56,50 @@ const parseRss = (data, state) => {
             postLink: item.querySelector('link').textContent
         }
     })
-    //console.log('POSTS FROM PARSE: ', posts)
     return {title, feedId, desc, posts};
 }
 
-//запуск loadFeed через доп. функцию и setTimeout
-const addNewPosts = (state) => {
+//запуск периодической загрузки обновлений
+const startRegularUpdate = (state) => {
+    //Если фидов несколько и один падает с ошибкой - обновление не прекращается
+    //Другой фид отвечает с таймаутом 20 секунд - дать закончить работу (каждые 5 сек не выполнять запрос)
+    //Загрузка после проверки (then, catch, Promise.All, finally, Promise.allSettled)
     const checkFeeds = () => {
         console.log('Testing checkFeeds');
         if (state.feeds.length < 1) {
             return null;
         }
-        state.feeds.forEach((feed) => {
+        const resultFeeds = state.feeds.map((feed) => {
             loadFeed(feed, state);
         })
-        setTimeout(checkFeeds, 5000);
+        Promise.allSettled(resultFeeds)
+            .then(() =>
+            {
+                setTimeout(checkFeeds, 5000) }
+            )
+            .catch((e) =>
+                console.log('Error while checking feeds: ', e)
+            )
+            //promise.all/ finally
     }
     checkFeeds();
 }
 
 const loadFeed = (link, state) => {
-    fetch(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
+    //долгий ответ - имитация
+    return axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
         .then(response => {
             console.log('response: ', response);
-            if (response.ok) return response.json()
+            if (response.data) return response.data;
             state.form.feedbackMessage = "Can't be loaded!";
-            //throw new Error("Can't be loaded!");
-            return null;
+            throw new Error("Can't be loaded!");
         })
         .then(data => {
             //Обработка ошибок DOM Parser
             const {title, feedId, desc, posts} = parseRss(data, state);
             if (state.feeds.filter((feed) => feed.link === link).length === 0){
                 state.feeds.push({feedId, title: title.textContent, desc: desc.textContent, link});
+                state.form.feedbackMessage = 'Success!';
             }
             posts.forEach((post) => {
                 if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)){
@@ -153,7 +165,7 @@ const main = async () => {
             });
 
     })
-    addNewPosts(state);
+    startRegularUpdate(state);
     //render(state, i18Inst, elements);
 }
 
