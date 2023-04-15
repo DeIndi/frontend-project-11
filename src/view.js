@@ -42,7 +42,9 @@ const render = (state, i18Inst, elements, path = '') => {
   if (path.startsWith('form')) {
     if (state.form.feedbackMessage) {
       elements.feedbackMessage.textContent = i18Inst.t(state.form.feedbackMessage);
-      if (!state.form.isValid || state.form.feedbackMessage === 'feedbackAlreadyExists') {
+      if (!state.form.isValid
+          || state.form.feedbackMessage === 'feedbackAlreadyExists'
+          || state.form.feedbackMessage === 'feedbackNetworkError') {
         elements.formInput.classList.add('is-invalid');
         elements.feedbackMessage.classList.remove('text-success');
         elements.feedbackMessage.classList.add('text-danger');

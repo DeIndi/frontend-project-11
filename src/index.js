@@ -66,7 +66,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
     throw new Error("Can't be loaded!");
   })
   .catch((error) => {
-    state.form.feedbackMessage = error;
+    state.form.feedbackMessage = 'feedbackNetworkError';
     throw (error);
   })
   .then((data) => {

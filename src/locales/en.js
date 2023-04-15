@@ -14,5 +14,6 @@ export default {
     fullArticle: 'Read full article',
     feedbackAlreadyExists: 'RSS already exists',
     feedbackNoValidRSS: 'Resource does not contain valid RSS',
+    feedbackNetworkError: 'Network error',
   },
 };

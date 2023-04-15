@@ -14,5 +14,6 @@ export default {
     fullArticle: 'Читать полностью',
     feedbackAlreadyExists: 'RSS уже существует',
     feedbackNoValidRSS: 'Ресурс не содержит валидный RSS',
+    feedbackNetworkError: 'Ошибка сети',
   },
 };
