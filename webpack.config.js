@@ -53,6 +53,6 @@ const config = {
 };
 
 export default () => {
-  config.mode = 'production';
+  config.mode = 'development';
   return config;
 };
