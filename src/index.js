@@ -43,7 +43,6 @@ const parseRss = (data, state) => {
   state.currentFeedTitle = title.textContent;
   state.currentFeedDesc = desc.textContent;
   const feedId = _.uniqueId();
-  console.log('DOM: ', rssDOM);
   const items = channel.querySelectorAll('item');
   const posts = [...items].map((item) => ({
     feedId,
@@ -59,7 +58,6 @@ const parseRss = (data, state) => {
 
 const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
-    console.log('response: ', response);
     if (response.data) return response.data;
     state.form.isValid = false;
     state.form.feedbackMessage = 'feedbackNegative';
@@ -107,7 +105,6 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
 
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
-    console.log('Testing checkFeeds');
     if (state.feeds.length < 1) {
       return null;
     }
@@ -149,14 +146,11 @@ const main = async () => {
   elements.formInput.addEventListener('input', (e) => {
     e.preventDefault();
     watchedState.form.data = e.target.value;
-    console.log('Updated: ', watchedState.form.data);
   });
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    console.log('Validating : ', watchedState.form.data);
     validate(watchedState.form.data)
       .then(() => {
-        console.log('LOADING : ', watchedState.form.data);
         loadFeed(watchedState.form.data, watchedState);
         watchedState.form = { data: '', feedbackMessage: null, isValid: true };
         elements.formInput.value = '';

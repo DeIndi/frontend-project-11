@@ -66,7 +66,6 @@ const render = (state, i18Inst, elements, path = '') => {
     elements.posts.innerHTML = '';
     elements.posts.innerHTML = renderPosts(state, i18Inst);
     elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
-    console.log('state.posts: ', state.posts);
     const renderedPosts = document.querySelectorAll('.post-item');
     if (renderedPosts.length > 0) {
       renderedPosts.forEach((renderedPost) => {
