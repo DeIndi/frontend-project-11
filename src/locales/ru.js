@@ -13,5 +13,6 @@ export default {
     view: 'Просмотр',
     fullArticle: 'Читать полностью',
     feedbackAlreadyExists: 'RSS уже существует',
+    feedbackNoValidRSS: 'Ресурс не содержит валидный RSS',
   },
 };

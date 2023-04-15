@@ -100,7 +100,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
         }
       });
     } catch (error) {
-      state.form.feedbackMessage = 'feedbackNegative';
+      state.form.feedbackMessage = 'feedbackNoValidRSS';
       state.form.isValid = false;
     }
   });
