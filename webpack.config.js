@@ -1,5 +1,5 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
-/* eslint no-underscore-dangle: 0 */
+
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { dirname } from 'node:path';
@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const isProduction = process.env.NODE_ENV == 'production';
 
 const config = {
   entry: './src/index.js',
@@ -38,7 +39,7 @@ const config = {
         use: [
           'style-loader',
           'css-loader',
-        ],
+        ]
       },
       {
         test: /\.s[ac]ss$/i,
@@ -53,6 +54,10 @@ const config = {
 };
 
 export default () => {
-  config.mode = 'development';
+  if (isProduction) {
+    config.mode = 'production';
+  } else {
+    config.mode = 'development';
+  }
   return config;
 };
