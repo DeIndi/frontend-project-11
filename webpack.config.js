@@ -5,9 +5,11 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// eslint-disable-next-line no-underscore-dangle
 const __filename = fileURLToPath(import.meta.url);
+// eslint-disable-next-line no-underscore-dangle
 const __dirname = dirname(__filename);
-const isProduction = process.env.NODE_ENV == 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
   entry: './src/index.js',
@@ -39,7 +41,7 @@ const config = {
         use: [
           'style-loader',
           'css-loader',
-        ]
+        ],
       },
       {
         test: /\.s[ac]ss$/i,
