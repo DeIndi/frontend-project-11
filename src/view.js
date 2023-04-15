@@ -47,7 +47,6 @@ const render = (state, i18Inst, elements, path = '') => {
         elements.feedbackMessage.classList.remove('text-success');
         elements.feedbackMessage.classList.add('text-danger');
       } else if (state.form.feedbackMessage === 'feedbackPositive') {
-        elements.formInput.value = '';
         elements.formInput.classList.remove('is-invalid');
         elements.feedbackMessage.classList.remove('text-danger');
         elements.feedbackMessage.classList.add('text-success');

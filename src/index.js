@@ -159,6 +159,7 @@ const main = async () => {
         console.log('LOADING : ', watchedState.form.data);
         loadFeed(watchedState.form.data, watchedState);
         watchedState.form = { data: '', feedbackMessage: null, isValid: true };
+        elements.formInput.value = '';
         // elements.formInput.value = '';
         view(state, i18Inst, elements);
       })
