@@ -114,58 +114,60 @@ const startRegularUpdate = (state) => {
         setTimeout(checkFeeds, 5000);
       })
       .catch((e) => console.log('Error while checking feeds: ', e));
-    // promise.all/ finally
   };
   return checkFeeds();
 };
-// определять выбранный фид по id
-const main = async () => {
+
+const main = () => {
   const i18Inst = i18n.createInstance();
-  await i18Inst.init({ resources });
-  await i18Inst.changeLanguage('ru');
-  const state = {
-    language: 'en',
-    form: {
-      data: '',
-      feedbackMessage: null,
-      isValid: false,
-    },
-    currentFeedTitle: '',
-    currentFeedDesc: '',
-    currentFeedId: null,
-    modal: {
-      activePostId: null,
-    },
-    feeds: [],
-    posts: [],
-    uiState: {
-      posts: [],
-    },
-  };
-  const watchedState = onChange(state, view(state, i18Inst, elements));
-  elements.formInput.addEventListener('input', (e) => {
-    e.preventDefault();
-    watchedState.form.data = e.target.value;
-  });
-  elements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    validate(watchedState.form.data)
-      .then(() => {
-        loadFeed(watchedState.form.data, watchedState);
-        watchedState.form = { data: '', feedbackMessage: null, isValid: true };
-        elements.formInput.value = '';
-        // elements.formInput.value = '';
-        view(state, i18Inst, elements);
-      })
-      .catch((error) => {
-        watchedState.form = { data: '', feedbackMessage: error, isValid: false };
-        // elements.formInput.value = '';
-        watchedState.feeds = [];
-        watchedState.posts = [];
-        view(state, i18Inst, elements);
-      });
-  });
-  startRegularUpdate(state);
+  i18Inst.init({ resources })
+    .then(() => {
+      i18Inst.changeLanguage('ru')
+        .then(() => {
+          const state = {
+            language: 'en',
+            form: {
+              data: '',
+              feedbackMessage: null,
+              isValid: false,
+            },
+            currentFeedTitle: '',
+            currentFeedDesc: '',
+            currentFeedId: null,
+            modal: {
+              activePostId: null,
+            },
+            feeds: [],
+            posts: [],
+            uiState: {
+              posts: [],
+            },
+          };
+          const watchedState = onChange(state, view(state, i18Inst, elements));
+          elements.formInput.addEventListener('input', (e) => {
+            e.preventDefault();
+            watchedState.form.data = e.target.value;
+          });
+          elements.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            validate(watchedState.form.data)
+              .then(() => {
+                loadFeed(watchedState.form.data, watchedState);
+                watchedState.form = { data: '', feedbackMessage: null, isValid: true };
+                elements.formInput.value = '';
+                view(state, i18Inst, elements);
+              })
+              .catch((error) => {
+                watchedState.form = { data: '', feedbackMessage: error, isValid: false };
+                watchedState.feeds = [];
+                watchedState.posts = [];
+                view(state, i18Inst, elements);
+              });
+          });
+          startRegularUpdate(state);
+        });
+    })
+    .catch((error) => console.error(error));
 };
 
 main();

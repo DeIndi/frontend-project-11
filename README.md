@@ -7,10 +7,14 @@ Third frontend project out of four.
 Program loads one or several RSS feeds, validates the link, and displays the content in the posts section.
 It also shows active feeds in the feeds section.
 
+Vercel link:
+https://frontend-project-11-deindi.vercel.app/
+
 ## Requirements
 
 - Make
 - git
+- node-version: [16.x]
 
 ## Installation
 
