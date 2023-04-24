@@ -2,5 +2,7 @@ lint:
 	npx eslint .
 install:
 	npm ci
-link:
-	npm link
+build:
+    npm run build
+serve:
+    npm run serve

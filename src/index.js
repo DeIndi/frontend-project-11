@@ -1,5 +1,4 @@
 import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import * as yup from 'yup';
 import onChange from 'on-change';
 import i18n from 'i18next';
@@ -7,6 +6,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import resources from './locales/locale.js';
 import view from './view.js';
+import './index.scss';
 
 const schema = yup.string().trim().required();
 
@@ -105,10 +105,13 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
 
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
-    if (state.feeds.length < 1) {
+    console.log('Regular feeds check');
+    /* if (state.feeds.length < 1) {
       return null;
-    }
+    } */
+    console.log('before map');
     const resultFeeds = state.feeds.map((feed) => loadFeed(feed, state));
+    console.log('after map log');
     return Promise.allSettled(resultFeeds)
       .then(() => {
         setTimeout(checkFeeds, 5000);
@@ -150,18 +153,21 @@ const main = () => {
           });
           elements.form.addEventListener('submit', (e) => {
             e.preventDefault();
+            e.target.disabled = true;
             validate(watchedState.form.data)
               .then(() => {
                 loadFeed(watchedState.form.data, watchedState);
                 watchedState.form = { data: '', feedbackMessage: null, isValid: true };
                 elements.formInput.value = '';
                 view(state, i18Inst, elements);
+                e.target.disabled = false;
               })
               .catch((error) => {
                 watchedState.form = { data: '', feedbackMessage: error, isValid: false };
                 watchedState.feeds = [];
                 watchedState.posts = [];
                 view(state, i18Inst, elements);
+                e.target.disabled = false;
               });
           });
           startRegularUpdate(state);

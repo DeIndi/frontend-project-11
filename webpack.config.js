@@ -4,6 +4,7 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 // eslint-disable-next-line no-underscore-dangle
 const __filename = fileURLToPath(import.meta.url);
@@ -15,6 +16,7 @@ const config = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
   },
   devServer: {
     open: true,
@@ -24,7 +26,6 @@ const config = {
     new HtmlWebpackPlugin({
       template: 'index.html',
     }),
-
   ],
   module: {
     rules: [

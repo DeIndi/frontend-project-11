@@ -74,6 +74,11 @@ const render = (state, i18Inst, elements, path = '') => {
           setPostAsViewed(state, renderedPost.getAttribute('id'));
           render(state, i18Inst, elements, path);
         });
+        renderedPost.querySelector('a').addEventListener('click', () => {
+          changeActivePost(state, renderedPost.getAttribute('id'));
+          setPostAsViewed(state, renderedPost.getAttribute('id'));
+          render(state, i18Inst, elements, path);
+        });
       });
     }
     const activePost = state.posts.find((post) => post.postId === state.modal.activePostId);
