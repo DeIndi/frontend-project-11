@@ -70,7 +70,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
   .then((data) => {
     if (!data.contents) {
       state.form.isValid = false;
-      state.form.feedbackMessage = 'feedbackNoValidRSS';
+      state.form.feedbackMessage = 'feedbackNegative';
       return;
     }
     try {
