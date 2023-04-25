@@ -70,7 +70,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
   .then((data) => {
     if (!data.contents) {
       state.form.isValid = false;
-      state.form.feedbackMessage = 'feedbackNegative';
+      state.form.feedbackMessage = 'feedbackNoValidRSS';
       return;
     }
     try {
@@ -158,8 +158,8 @@ const main = () => {
                 e.target.disabled = false;
                 view(state, i18Inst, elements);
               })
-              .catch((error) => {
-                watchedState.form = { data: '', feedbackMessage: error, isValid: false };
+              .catch(() => {
+                watchedState.form = { data: '', feedbackMessage: 'feedbackNegative', isValid: false };
                 watchedState.feeds = [];
                 watchedState.posts = [];
                 e.target.disabled = false;
