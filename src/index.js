@@ -8,7 +8,7 @@ import resources from './locales/locale.js';
 import view from './view.js';
 import './index.scss';
 
-const schema = yup.string().trim().required();
+const schema = yup.string().trim().url().required();
 
 const validate = (url) => schema.validate(url, { abortEarly: false });
 
@@ -70,7 +70,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
   .then((data) => {
     if (!data.contents) {
       state.form.isValid = false;
-      state.form.feedbackMessage = 'feedbackNegative';
+      state.form.feedbackMessage = 'feedbackNoValidRSS';
       return;
     }
     try {
