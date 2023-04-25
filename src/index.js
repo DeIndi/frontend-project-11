@@ -68,11 +68,11 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
     throw (error);
   })
   .then((data) => {
-    if (!data.contents) {
+   /* if (!data) {
       state.form.isValid = false;
       state.form.feedbackMessage = 'feedbackNegative';
       return;
-    }
+    }*/
     try {
       const {
         title, feedId, desc, posts,
@@ -106,12 +106,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
     console.log('Regular feeds check');
-    /* if (state.feeds.length < 1) {
-      return null;
-    } */
-    console.log('before map');
     const resultFeeds = state.feeds.map((feed) => loadFeed(feed, state));
-    console.log('after map log');
     return Promise.allSettled(resultFeeds)
       .then(() => {
         setTimeout(checkFeeds, 5000);
@@ -149,6 +144,7 @@ const main = () => {
           const watchedState = onChange(state, view(state, i18Inst, elements));
           elements.formInput.addEventListener('input', (e) => {
             e.preventDefault();
+            watchedState.form = { data: '', feedbackMessage: null, isValid: true };
             watchedState.form.data = e.target.value;
           });
           elements.form.addEventListener('submit', (e) => {
@@ -159,15 +155,15 @@ const main = () => {
                 loadFeed(watchedState.form.data, watchedState);
                 watchedState.form = { data: '', feedbackMessage: null, isValid: true };
                 elements.formInput.value = '';
-                view(state, i18Inst, elements);
                 e.target.disabled = false;
+                view(state, i18Inst, elements);
               })
               .catch((error) => {
                 watchedState.form = { data: '', feedbackMessage: error, isValid: false };
                 watchedState.feeds = [];
                 watchedState.posts = [];
-                view(state, i18Inst, elements);
                 e.target.disabled = false;
+                view(state, i18Inst, elements);
               });
           });
           startRegularUpdate(state);
