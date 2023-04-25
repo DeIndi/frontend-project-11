@@ -26,11 +26,6 @@ cd frontend-project-11
 make install
 ```
 ## Launching
-Development mode:
 ```bash
-npx webpack serve --mode=development
-```
-Production mode:
-```bash
-npx webpack serve --mode=production
+make build
 ```
