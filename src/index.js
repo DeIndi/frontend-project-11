@@ -106,6 +106,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
     console.log('Regular feeds check');
+    console.log('state: ', state);
     const resultFeeds = state.feeds.map((feed) => loadFeed(feed, state));
     return Promise.allSettled(resultFeeds)
       .then(() => {
@@ -160,8 +161,6 @@ const main = () => {
               })
               .catch(() => {
                 watchedState.form = { data: '', feedbackMessage: 'feedbackNegative', isValid: false };
-                watchedState.feeds = [];
-                watchedState.posts = [];
                 e.target.disabled = false;
                 view(state, i18Inst, elements);
               });
