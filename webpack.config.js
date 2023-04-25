@@ -26,9 +26,7 @@ const config = {
     new HtmlWebpackPlugin({
       template: 'index.html',
     }),
-    new MiniCssExtractPlugin({
-      filename: '[name].scss',
-    }),
+    new MiniCssExtractPlugin(),
   ],
   module: {
     rules: [
@@ -42,13 +40,6 @@ const config = {
       },
       {
         test: /\.css$/i,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-        ],
-      },
-      {
-        test: /\.scss$/i,
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
