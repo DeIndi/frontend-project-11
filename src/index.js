@@ -126,6 +126,7 @@ const main = () => {
             language: 'en',
             form: {
               data: '',
+              lastFeed: '',
               feedbackMessage: null,
               isValid: false,
             },
@@ -144,7 +145,6 @@ const main = () => {
           const watchedState = onChange(state, view(state, i18Inst, elements));
           elements.formInput.addEventListener('input', (e) => {
             e.preventDefault();
-            watchedState.form = { data: '', feedbackMessage: null, isValid: true };
             watchedState.form.data = e.target.value;
           });
           elements.form.addEventListener('submit', (e) => {
