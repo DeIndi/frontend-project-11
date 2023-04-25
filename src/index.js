@@ -68,7 +68,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
     throw (error);
   })
   .then((data) => {
-    if (!data) {
+    if (!data.contents) {
       state.form.isValid = false;
       state.form.feedbackMessage = 'feedbackNegative';
       return;
