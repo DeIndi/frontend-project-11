@@ -25,7 +25,11 @@ git clone https://github.com/DeIndi/frontend-project-11
 cd frontend-project-11
 make install
 ```
-## Launching
+## Building
 ```bash
 make build
+```
+## Launching
+```bash
+make start
 ```

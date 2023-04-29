@@ -30,7 +30,7 @@ const elements = {
 };
 
 // локальный прокси-сервер all origins
-const parseRss = (data, state) => {
+const parseRss = (data) => {
   const parser = new DOMParser();
   const rssDOM = parser.parseFromString(data.contents, 'text/xml');
   const errorNode = rssDOM.querySelector('parsererror');
@@ -40,8 +40,6 @@ const parseRss = (data, state) => {
   const channel = rssDOM.querySelector('channel');
   const title = rssDOM.querySelector('title');
   const desc = rssDOM.querySelector('description');
-  state.currentFeedTitle = title.textContent;
-  state.currentFeedDesc = desc.textContent;
   const feedId = _.uniqueId();
   const items = channel.querySelectorAll('item');
   const posts = [...items].map((item) => ({
@@ -56,8 +54,11 @@ const parseRss = (data, state) => {
   };
 };
 
+const feedIsNew = (link, state) => state.feeds.filter((f) => f.link === link).length === 0;
+
 const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
+    console.log('loading feed ', link);
     if (response.data) return response.data;
     state.form.isValid = false;
     state.form.feedbackMessage = 'feedbackNegative';
@@ -77,24 +78,16 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
       const {
         title, feedId, desc, posts,
       } = parseRss(data, state);
-      if (state.feeds.filter((feed) => feed.link === link).length === 0) {
+      if (feedIsNew(link, state)) {
         state.feeds.push({
           feedId, title: title.textContent, desc: desc.textContent, link,
         });
-        state.form.isValid = true;
-        state.form.feedbackMessage = 'feedbackPositive';
-      } else {
-        state.form.feedbackMessage = 'feedbackAlreadyExists';
       }
+      console.log('new posts: ', posts);
       posts.forEach((post) => {
         if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
-          const {
-            // eslint-disable-next-line no-shadow
-            feedId, postId, title, description, postLink,
-          } = post;
-          state.posts.push({
-            feedId, postId, title, description, postLink,
-          });
+          console.log('new post found for feed: ', post.postLink);
+          state.posts.push(post);
         }
       });
     } catch (error) {
@@ -103,11 +96,40 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
     }
   });
 
+const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
+  .then((response) => {
+    console.log('updating feed ', link);
+    if (response.data) return response.data;
+    throw new Error("Can't be loaded!");
+  })
+  .catch((error) => {
+    throw (error);
+  })
+  .then((data) => {
+    if (!data.contents) {
+      console.log('no data to update found!');
+      return;
+    }
+    try {
+      const {
+        posts,
+      } = parseRss(data, state);
+      console.log('new posts: ', posts);
+      posts.forEach((post) => {
+        if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
+          console.log('new post found for feed: ', post.postLink);
+          state.posts.push(post);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
-    console.log('Regular feeds check');
-    console.log('state: ', state);
-    const resultFeeds = state.feeds.map((feed) => loadFeed(feed, state));
+    console.log('current feeds: ', state.feeds);
+    const resultFeeds = state.feeds.map((feed) => updateFeed(feed.link, state));
     return Promise.allSettled(resultFeeds)
       .then(() => {
         setTimeout(checkFeeds, 5000);
@@ -126,14 +148,12 @@ const main = () => {
           const state = {
             language: 'en',
             form: {
+              isBeingProcessed: false,
               data: '',
               lastFeed: '',
               feedbackMessage: null,
               isValid: false,
             },
-            currentFeedTitle: '',
-            currentFeedDesc: '',
-            currentFeedId: null,
             modal: {
               activePostId: null,
             },
@@ -150,22 +170,30 @@ const main = () => {
           });
           elements.form.addEventListener('submit', (e) => {
             e.preventDefault();
-            e.target.disabled = true;
             validate(watchedState.form.data)
               .then(() => {
-                loadFeed(watchedState.form.data, watchedState);
-                watchedState.form = { data: '', feedbackMessage: null, isValid: true };
-                elements.formInput.value = '';
-                e.target.disabled = false;
-                view(state, i18Inst, elements);
+                if (!feedIsNew(watchedState.form.data, watchedState)) {
+                  watchedState.form.isValid = false;
+                  watchedState.form.feedbackMessage = 'feedbackAlreadyExists';
+                  view(watchedState, i18Inst, elements);
+                  return;
+                }
+                watchedState.form.isBeingProcessed = true;
+                loadFeed(watchedState.form.data, watchedState).then(() => {
+                  watchedState.form.isValid = true;
+                  watchedState.form.feedbackMessage = 'feedbackPositive';
+                  watchedState.form.isBeingProcessed = false;
+                  watchedState.form.data = '';
+                });
+                view(watchedState, i18Inst, elements);
               })
               .catch(() => {
                 watchedState.form = { data: '', feedbackMessage: 'feedbackNegative', isValid: false };
-                e.target.disabled = false;
-                view(state, i18Inst, elements);
+                watchedState.form.isBeingProcessed = false;
+                view(watchedState, i18Inst, elements);
               });
           });
-          startRegularUpdate(state);
+          startRegularUpdate(watchedState);
         });
     })
     .catch((error) => console.error(error));

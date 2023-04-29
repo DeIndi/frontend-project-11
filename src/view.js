@@ -26,7 +26,7 @@ const renderPosts = (state, i18Inst) => {
 };
 
 const renderFeeds = (state, i18Inst) => {
-  if (!state.currentFeedTitle || !state.currentFeedDesc) {
+  if (state.feeds.length <= 0) {
     return null;
   }
   return (`<div class="card border-0">
@@ -88,6 +88,11 @@ const render = (state, i18Inst, elements, path = '') => {
       elements.modalBody.innerHTML = description;
       elements.fullArticle.setAttribute('href', postLink);
     }
+  }
+  if (state.form.isBeingProcessed) {
+    elements.formSubmit.setAttribute('disabled', 'disabled');
+  } else {
+    elements.formSubmit.removeAttribute('disabled');
   }
 };
 
