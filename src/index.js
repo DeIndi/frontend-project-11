@@ -58,7 +58,6 @@ const feedIsNew = (link, state) => state.feeds.filter((f) => f.link === link).le
 
 const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
-    console.log('loading feed ', link);
     if (response.data) return response.data;
     state.form.isValid = false;
     state.form.feedbackMessage = 'feedbackNegative';
@@ -83,10 +82,8 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
           feedId, title: title.textContent, desc: desc.textContent, link,
         });
       }
-      console.log('new posts: ', posts);
       posts.forEach((post) => {
         if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
-          console.log('new post found for feed: ', post.postLink);
           state.posts.push(post);
         }
       });
@@ -96,7 +93,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
     }
   });
 
-const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
+/*const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
     console.log('updating feed ', link);
     if (response.data) return response.data;
@@ -125,10 +122,10 @@ const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get
       console.log(error);
     }
   });
+*/
 
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
-    console.log('current feeds: ', state.feeds);
     const resultFeeds = state.feeds.map((feed) => loadFeed(feed.link, state));
     return Promise.allSettled(resultFeeds)
       .then(() => {
@@ -183,7 +180,7 @@ const main = () => {
                   watchedState.form.isValid = true;
                   watchedState.form.feedbackMessage = 'feedbackPositive';
                   watchedState.form.isBeingProcessed = false;
-                  elements.formInput.value = '';
+                  //elements.formInput.value = '';
                   watchedState.form.data = '';
                 });
                 view(watchedState, i18Inst, elements);
@@ -191,7 +188,7 @@ const main = () => {
               .catch(() => {
                 watchedState.form = { data: '', feedbackMessage: 'feedbackNegative', isValid: false };
                 watchedState.form.isBeingProcessed = false;
-                elements.formInput.value = '';
+                //elements.formInput.value = '';
                 view(watchedState, i18Inst, elements);
               });
           });
