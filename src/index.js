@@ -180,7 +180,7 @@ const main = () => {
                   watchedState.form.isValid = true;
                   watchedState.form.feedbackMessage = 'feedbackPositive';
                   watchedState.form.isBeingProcessed = false;
-                  //elements.formInput.value = '';
+                  elements.formInput.value = '';
                   watchedState.form.data = '';
                 });
                 view(watchedState, i18Inst, elements);
@@ -188,7 +188,7 @@ const main = () => {
               .catch(() => {
                 watchedState.form = { data: '', feedbackMessage: 'feedbackNegative', isValid: false };
                 watchedState.form.isBeingProcessed = false;
-                //elements.formInput.value = '';
+                elements.formInput.value = '';
                 view(watchedState, i18Inst, elements);
               });
           });
