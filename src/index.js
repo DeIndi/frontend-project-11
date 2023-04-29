@@ -93,7 +93,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
     }
   });
 
-/*const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
+/* const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
     console.log('updating feed ', link);
     if (response.data) return response.data;
@@ -174,17 +174,26 @@ const main = () => {
                 if (!feedIsNew(watchedState.form.data, watchedState)) {
                   watchedState.form.isValid = false;
                   watchedState.form.feedbackMessage = 'feedbackAlreadyExists';
+                  elements.formInput.value = '';
                   view(watchedState, i18Inst, elements);
                   return;
                 }
                 watchedState.form.isBeingProcessed = true;
-                loadFeed(watchedState.form.data, watchedState).then(() => {
-                  watchedState.form.isValid = true;
-                  watchedState.form.feedbackMessage = 'feedbackPositive';
-                  watchedState.form.isBeingProcessed = false;
-                  elements.formInput.value = '';
-                  watchedState.form.data = '';
-                });
+                loadFeed(watchedState.form.data, watchedState)
+                  .then(() => {
+                    watchedState.form.isValid = true;
+                    watchedState.form.feedbackMessage = 'feedbackPositive';
+                    watchedState.form.isBeingProcessed = false;
+                    elements.formInput.value = '';
+                    watchedState.form.data = '';
+                  })
+                  .catch(() => {
+                    watchedState.form.isValid = false;
+                    watchedState.form.feedbackMessage = 'feedbackNoValidRSS';
+                    watchedState.form.isBeingProcessed = false;
+                    elements.formInput.value = '';
+                    watchedState.form.data = '';
+                  });
                 view(watchedState, i18Inst, elements);
               })
               .catch(() => {
