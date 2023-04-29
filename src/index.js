@@ -167,6 +167,8 @@ const main = () => {
           });
           elements.form.addEventListener('submit', (e) => {
             e.preventDefault();
+            console.log('Trying to submit: ', watchedState.form.data);
+            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
             validate(watchedState.form.data)
               .then(() => {
                 if (!feedIsNew(watchedState.form.data, watchedState)) {
