@@ -129,7 +129,7 @@ const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
     console.log('current feeds: ', state.feeds);
-    const resultFeeds = state.feeds.map((feed) => updateFeed(feed.link, state));
+    const resultFeeds = state.feeds.map((feed) => loadFeed(feed.link, state));
     return Promise.allSettled(resultFeeds)
       .then(() => {
         setTimeout(checkFeeds, 5000);
@@ -183,6 +183,7 @@ const main = () => {
                   watchedState.form.isValid = true;
                   watchedState.form.feedbackMessage = 'feedbackPositive';
                   watchedState.form.isBeingProcessed = false;
+                  elements.formInput.value = '';
                   watchedState.form.data = '';
                 });
                 view(watchedState, i18Inst, elements);
@@ -190,6 +191,7 @@ const main = () => {
               .catch(() => {
                 watchedState.form = { data: '', feedbackMessage: 'feedbackNegative', isValid: false };
                 watchedState.form.isBeingProcessed = false;
+                elements.formInput.value = '';
                 view(watchedState, i18Inst, elements);
               });
           });
