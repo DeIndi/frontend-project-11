@@ -89,7 +89,8 @@ const render = (state, i18Inst, elements, path = '') => {
       elements.fullArticle.setAttribute('href', postLink);
     }
   }
-  if (state.form.isBeingProcessed) {
+
+  if (state.loadingProcess.status === 'loading') {
     elements.formSubmit.setAttribute('disabled', 'disabled');
   } else {
     elements.formSubmit.removeAttribute('disabled');

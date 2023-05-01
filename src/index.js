@@ -40,20 +40,24 @@ const parseRss = (data) => {
 
 const feedIsNew = (link, state) => state.feeds.filter((f) => f.link === link).length === 0;
 
+//один then и один catch
 const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
+    state.loadingProcess.status = 'loading';
     if (response.data) return response.data;
     state.form.isValid = false;
     state.form.feedbackMessage = 'feedbackNegative';
     throw new Error("Can't be loaded!");
   })
   .catch((error) => {
+    state.loadingProcess.status = 'fail';
     state.form.isValid = false;
     state.form.feedbackMessage = 'feedbackNetworkError';
     throw (error);
   })
   .then((data) => {
     if (!data.contents) {
+      state.loadingProcess.status = 'fail';
       state.form.isValid = false;
       state.form.feedbackMessage = 'feedbackNoValidRSS';
       return;
@@ -74,8 +78,10 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
       });
       state.form.isValid = true;
       state.form.feedbackMessage = 'feedbackPositive';
+      state.loadingProcess.status = 'success';
     } catch (error) {
       state.form.feedbackMessage = 'feedbackNoValidRSS';
+      state.loadingProcess.status = 'fail';
       state.form.isValid = false;
     }
   });
@@ -137,8 +143,10 @@ const main = () => {
   };
   const state = {
     language: 'en',
+    loadingProcess: {
+      status: 'idle',
+    },
     form: {
-      isBeingProcessed: false,
       data: '',
       lastFeed: '',
       feedbackMessage: null,
@@ -174,16 +182,16 @@ const main = () => {
                   view(watchedState, i18Inst, elements);
                   return;
                 }
-                watchedState.form.isBeingProcessed = true;
+                watchedState.loadingProcess.status = 'loading';
                 loadFeed(watchedState.form.data, watchedState)
                   .then(() => {
-                    watchedState.form.isBeingProcessed = false;
+                    watchedState.loadingProcess.status = 'idle';
                     elements.formInput.value = '';
                     watchedState.form.data = '';
                   })
                   .catch(() => {
                     watchedState.form.isValid = false;
-                    watchedState.form.isBeingProcessed = false;
+                    watchedState.loadingProcess.status = 'fail';
                     elements.formInput.value = '';
                     watchedState.form.data = '';
                   });
@@ -191,7 +199,7 @@ const main = () => {
               })
               .catch(() => {
                 watchedState.form = { data: '', feedbackMessage: 'feedbackNegative', isValid: false };
-                watchedState.form.isBeingProcessed = false;
+                watchedState.loadingProcess.status = 'fail';
                 elements.formInput.value = '';
                 view(watchedState, i18Inst, elements);
               });
