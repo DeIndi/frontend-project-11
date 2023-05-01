@@ -65,6 +65,7 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
     throw new Error("Can't be loaded!");
   })
   .catch((error) => {
+    state.form.isValid = false;
     state.form.feedbackMessage = 'feedbackNetworkError';
     throw (error);
   })
@@ -188,7 +189,6 @@ const main = () => {
                   })
                   .catch(() => {
                     watchedState.form.isValid = false;
-                    watchedState.form.feedbackMessage = 'feedbackNoValidRSS';
                     watchedState.form.isBeingProcessed = false;
                     elements.formInput.value = '';
                     watchedState.form.data = '';
