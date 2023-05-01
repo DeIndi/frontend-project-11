@@ -113,7 +113,6 @@ const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get
       const {
         posts,
       } = parseRss(data, state);
-      console.log('new posts: ', posts);
       posts.forEach((post) => {
         if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
           state.posts.push(post);
@@ -167,8 +166,6 @@ const main = () => {
           });
           elements.form.addEventListener('submit', (e) => {
             e.preventDefault();
-            console.log('Trying to submit: ', watchedState.form.data);
-            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
             validate(watchedState.form.data)
               .then(() => {
                 if (!feedIsNew(watchedState.form.data, watchedState)) {
