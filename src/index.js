@@ -126,7 +126,7 @@ const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get
 
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
-    const resultFeeds = state.feeds.map((feed) => loadFeed(feed.link, state));
+    const resultFeeds = state.feeds.map((feed) => updateFeed(feed.link, state));
     return Promise.allSettled(resultFeeds)
       .then(() => {
         setTimeout(checkFeeds, 5000);
@@ -181,8 +181,6 @@ const main = () => {
                 watchedState.form.isBeingProcessed = true;
                 loadFeed(watchedState.form.data, watchedState)
                   .then(() => {
-                    // watchedState.form.isValid = true;
-                    // watchedState.form.feedbackMessage = 'feedbackPositive';
                     watchedState.form.isBeingProcessed = false;
                     elements.formInput.value = '';
                     watchedState.form.data = '';
