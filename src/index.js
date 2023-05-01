@@ -98,7 +98,6 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
 
 const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
-    console.log('updating feed ', link);
     if (response.data) return response.data;
     throw new Error("Can't be loaded!");
   })
@@ -107,7 +106,6 @@ const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get
   })
   .then((data) => {
     if (!data.contents) {
-      console.log('no data to update found!');
       return;
     }
     try {
@@ -117,7 +115,6 @@ const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get
       console.log('new posts: ', posts);
       posts.forEach((post) => {
         if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
-          console.log('new post found for feed: ', post.postLink);
           state.posts.push(post);
         }
       });
@@ -128,7 +125,7 @@ const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get
 
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
-    const resultFeeds = state.feeds.map((feed) => updateFeed(feed.link, state));
+    const resultFeeds = state.feeds.map((feed) => loadFeed(feed.link, state));
     return Promise.allSettled(resultFeeds)
       .then(() => {
         setTimeout(checkFeeds, 5000);
