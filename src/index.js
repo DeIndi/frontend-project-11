@@ -12,23 +12,6 @@ const schema = yup.string().trim().url().required();
 
 const validate = (url) => schema.validate(url, { abortEarly: false });
 
-const elements = {
-  innerHeader: document.querySelector('h1'),
-  announcementP: document.querySelector('.lead'),
-  form: document.querySelector('form'),
-  formInput: document.getElementById('url-input'),
-  formSubmit: document.querySelector('button[type="submit"]'),
-  feedbackMessage: document.querySelector('.feedback'),
-  feeds: document.querySelector('.feeds'),
-  feedsHeader: document.querySelector('.feeds').querySelector('.h4'),
-  feedsTitle: document.querySelector('.feeds').querySelector('.h6'),
-  feedsDescription: document.querySelector('.feeds').querySelector('.text-black-50'),
-  posts: document.querySelector('.posts'),
-  fullArticle: document.querySelector('.full-article'),
-  modalHeader: document.querySelector('.modal-header'),
-  modalBody: document.querySelector('.modal-body'),
-};
-
 // локальный прокси-сервер all origins
 const parseRss = (data) => {
   const parser = new DOMParser();
@@ -136,29 +119,45 @@ const startRegularUpdate = (state) => {
 };
 
 const main = () => {
+  const elements = {
+    innerHeader: document.querySelector('h1'),
+    announcementP: document.querySelector('.lead'),
+    form: document.querySelector('form'),
+    formInput: document.getElementById('url-input'),
+    formSubmit: document.querySelector('button[type="submit"]'),
+    feedbackMessage: document.querySelector('.feedback'),
+    feeds: document.querySelector('.feeds'),
+    feedsHeader: document.querySelector('.feeds').querySelector('.h4'),
+    feedsTitle: document.querySelector('.feeds').querySelector('.h6'),
+    feedsDescription: document.querySelector('.feeds').querySelector('.text-black-50'),
+    posts: document.querySelector('.posts'),
+    fullArticle: document.querySelector('.full-article'),
+    modalHeader: document.querySelector('.modal-header'),
+    modalBody: document.querySelector('.modal-body'),
+  };
+  const state = {
+    language: 'en',
+    form: {
+      isBeingProcessed: false,
+      data: '',
+      lastFeed: '',
+      feedbackMessage: null,
+      isValid: false,
+    },
+    modal: {
+      activePostId: null,
+    },
+    feeds: [],
+    posts: [],
+    uiState: {
+      posts: [],
+    },
+  };
   const i18Inst = i18n.createInstance();
   i18Inst.init({ resources })
     .then(() => {
       i18Inst.changeLanguage('ru')
         .then(() => {
-          const state = {
-            language: 'en',
-            form: {
-              isBeingProcessed: false,
-              data: '',
-              lastFeed: '',
-              feedbackMessage: null,
-              isValid: false,
-            },
-            modal: {
-              activePostId: null,
-            },
-            feeds: [],
-            posts: [],
-            uiState: {
-              posts: [],
-            },
-          };
           const watchedState = onChange(state, view(state, i18Inst, elements));
           elements.formInput.addEventListener('input', (e) => {
             e.preventDefault();
