@@ -35,6 +35,7 @@ const parseRss = (data) => {
   const rssDOM = parser.parseFromString(data.contents, 'text/xml');
   const errorNode = rssDOM.querySelector('parsererror');
   if (errorNode) {
+    console.log('parsing error');
     throw new Error('Incorrect document type');
   }
   const channel = rssDOM.querySelector('channel');
@@ -87,13 +88,15 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
           state.posts.push(post);
         }
       });
+      state.form.isValid = true;
+      state.form.feedbackMessage = 'feedbackPositive';
     } catch (error) {
       state.form.feedbackMessage = 'feedbackNoValidRSS';
       state.form.isValid = false;
     }
   });
 
-/* const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
+const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
     console.log('updating feed ', link);
     if (response.data) return response.data;
@@ -122,7 +125,6 @@ const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?u
       console.log(error);
     }
   });
-*/
 
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
@@ -181,8 +183,8 @@ const main = () => {
                 watchedState.form.isBeingProcessed = true;
                 loadFeed(watchedState.form.data, watchedState)
                   .then(() => {
-                    watchedState.form.isValid = true;
-                    watchedState.form.feedbackMessage = 'feedbackPositive';
+                    // watchedState.form.isValid = true;
+                    // watchedState.form.feedbackMessage = 'feedbackPositive';
                     watchedState.form.isBeingProcessed = false;
                     elements.formInput.value = '';
                     watchedState.form.data = '';
