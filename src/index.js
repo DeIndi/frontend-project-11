@@ -12,7 +12,6 @@ const schema = yup.string().trim().url().required();
 
 const validate = (url) => schema.validate(url, { abortEarly: false });
 
-// локальный прокси-сервер all origins
 const parseRss = (data) => {
   const parser = new DOMParser();
   const rssDOM = parser.parseFromString(data.contents, 'text/xml');
