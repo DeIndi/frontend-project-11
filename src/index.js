@@ -40,7 +40,7 @@ const parseRss = (data) => {
 
 const feedIsNew = (link, state) => state.feeds.filter((f) => f.link === link).length === 0;
 
-//один then и один catch
+// один then и один catch
 const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
     state.loadingProcess.status = 'loading';
