@@ -40,51 +40,45 @@ const parseRss = (data) => {
 
 const feedIsNew = (link, state) => state.feeds.filter((f) => f.link === link).length === 0;
 
-// один then и один catch
-const loadFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
-  .then((response) => {
-    state.loadingProcess.status = 'loading';
-    if (response.data) return response.data;
-    state.form.isValid = false;
-    state.form.feedbackMessage = 'feedbackNegative';
-    throw new Error("Can't be loaded!");
-  })
-  .catch((error) => {
-    state.loadingProcess.status = 'fail';
-    state.form.isValid = false;
-    state.form.feedbackMessage = 'feedbackNetworkError';
-    throw (error);
-  })
-  .then((data) => {
-    if (!data.contents) {
-      state.loadingProcess.status = 'fail';
-      state.form.isValid = false;
-      state.form.feedbackMessage = 'feedbackNoValidRSS';
-      return;
-    }
-    try {
-      const {
-        title, feedId, desc, posts,
-      } = parseRss(data, state);
-      if (feedIsNew(link, state)) {
-        state.feeds.push({
-          feedId, title: title.textContent, desc: desc.textContent, link,
-        });
-      }
-      posts.forEach((post) => {
-        if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
-          state.posts.push(post);
+const loadFeed = (link, state) => {
+  state.loadingProcess.status = 'loading';
+  return axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
+    .then((response) => {
+      if (response.data) {
+        const {
+          title, feedId, desc, posts,
+        } = parseRss(response.data, state);
+        if (feedIsNew(link, state)) {
+          state.feeds.push({
+            feedId, title: title.textContent, desc: desc.textContent, link,
+          });
         }
-      });
-      state.form.isValid = true;
-      state.form.feedbackMessage = 'feedbackPositive';
-      state.loadingProcess.status = 'success';
-    } catch (error) {
-      state.form.feedbackMessage = 'feedbackNoValidRSS';
-      state.loadingProcess.status = 'fail';
+        posts.forEach((post) => {
+          if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
+            state.posts.push(post);
+          }
+        });
+        state.form.isValid = true;
+        state.form.feedbackMessage = 'feedbackPositive';
+        state.loadingProcess.status = 'success';
+      } else {
+        state.form.isValid = false;
+        state.form.feedbackMessage = 'feedbackNoValidRSS';
+        state.loadingProcess.status = 'fail';
+        throw new Error("Can't be loaded!");
+      }
+    })
+    .catch((error) => {
       state.form.isValid = false;
-    }
-  });
+      if (error.response) {
+        state.form.feedbackMessage = 'feedbackNetworkError';
+      } else {
+        state.form.feedbackMessage = 'feedbackNoValidRSS';
+      }
+      state.loadingProcess.status = 'fail';
+      throw (error);
+    });
+};
 
 const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
   .then((response) => {
