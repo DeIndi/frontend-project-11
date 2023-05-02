@@ -69,7 +69,8 @@ const loadFeed = (link, state) => {
     })
     .catch((error) => {
       state.form.isValid = false;
-      if (error.response) {
+      console.log('error', error);
+      if (error.code === 'ECONNABORTED' || error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN' || error.code === 'ERR_NETWORK') {
         state.form.feedbackMessage = 'feedbackNetworkError';
       } else {
         state.form.feedbackMessage = 'feedbackNoValidRSS';
