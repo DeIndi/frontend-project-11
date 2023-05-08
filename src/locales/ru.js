@@ -15,5 +15,13 @@ export default {
     feedbackAlreadyExists: 'RSS уже существует',
     feedbackNoValidRSS: 'Ресурс не содержит валидный RSS',
     feedbackNetworkError: 'Ошибка сети',
+    errors: {
+      errorAlreadyExists: 'RSS уже существует',
+      errorEmptyInput: 'Не должно быть пустым',
+      errorNetwork: 'Ошибка сети',
+      errorNotValidUrl: 'Ссылка должна быть валидным URL',
+      errorNoValidRss: 'Ресурс не содержит валидный RSS',
+    },
   },
 };
+// многоуровневый словарь

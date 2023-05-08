@@ -11,18 +11,24 @@ const renderPosts = (state, i18Inst) => {
     return null;
   }
   return (`
-    <div class="card border-0">
-    <div class="card-body"><h2 class="card-title h4">${i18Inst.t('posts')}</h2></div>
+  <div class="card border-0">
+    <div class="card-body">
+      <h2 class="card-title h4">${i18Inst.t('posts')}</h2>
+    </div>
     <ul class="list-group border-0 rounded-0">
-    ${state.posts.map(({ title, postId, postLink }) => `<li id="${postId}" class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0"><a
-        href=${postLink}
-        class=${state.uiState.posts[postId] === 'viewed' ? 'fw-normal' : 'fw-bold'} data-id="2" target="_blank" rel="noopener noreferrer">${title}</a>
-        <button type="button" class="btn btn-outline-primary btn-sm" data-id="2" data-bs-toggle="modal"
-                data-bs-target="#modal">${i18Inst.t('view')}
-        </button>
-    </li>`).join('')}
+      ${state.posts.map(({ title, postId, postLink }) => `
+        <li id="${postId}" class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
+          <a href="${postLink}" class="${state.uiState.posts[postId] === 'viewed' ? 'fw-normal' : 'fw-bold'}" data-id="2" target="_blank" rel="noopener noreferrer">
+            ${title}
+          </a>
+          <button type="button" class="btn btn-outline-primary btn-sm" data-id="2" data-bs-toggle="modal" data-bs-target="#modal">
+            ${i18Inst.t('view')}
+          </button>
+        </li>
+      `).join('')}
     </ul>
-    </div>`);
+  </div>
+`);
 };
 
 const renderFeeds = (state, i18Inst) => {
@@ -40,20 +46,13 @@ const renderFeeds = (state, i18Inst) => {
 
 const render = (state, i18Inst, elements, path = '') => {
   if (path.startsWith('form')) {
-    if (state.form.feedbackMessage) {
-      elements.feedbackMessage.textContent = i18Inst.t(state.form.feedbackMessage);
-      if (!state.form.isValid
-          || state.form.feedbackMessage === 'feedbackAlreadyExists'
-          || state.form.feedbackMessage === 'feedbackNetworkError') {
-        elements.formInput.classList.add('is-invalid');
-        elements.feedbackMessage.classList.remove('text-success');
-        elements.feedbackMessage.classList.add('text-danger');
-      } else if (state.form.feedbackMessage === 'feedbackPositive') {
-        elements.formInput.classList.remove('is-invalid');
-        elements.feedbackMessage.classList.remove('text-danger');
-        elements.feedbackMessage.classList.add('text-success');
-      }
-      elements.feedbackMessage.textContent = i18Inst.t(state.form.feedbackMessage);
+    const { feedbackMessage, isValid } = state.form;
+    const localizedMessage = isValid ? i18Inst.t(feedbackMessage) : i18Inst.t(`errors.${feedbackMessage}`);
+    if (feedbackMessage) {
+      elements.feedbackMessage.textContent = localizedMessage;
+      elements.formInput.classList.toggle('is-invalid', !isValid);
+      elements.feedbackMessage.classList.toggle('text-success', isValid);
+      elements.feedbackMessage.classList.toggle('text-danger', !isValid);
     } else {
       elements.feedbackMessage.textContent = '';
     }

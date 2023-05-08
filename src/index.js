@@ -5,12 +5,14 @@ import i18n from 'i18next';
 import axios from 'axios';
 import _ from 'lodash';
 import resources from './locales/locale.js';
-import view from './view.js';
+import renderView from './view.js';
 import './index.scss';
 
 const schema = yup.string().trim().url().required();
 
 const validate = (url) => schema.validate(url, { abortEarly: false });
+
+const proxyLink = (link) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`;
 
 const parseRss = (data) => {
   const parser = new DOMParser();
@@ -41,7 +43,7 @@ const feedIsNew = (link, state) => state.feeds.filter((f) => f.link === link).le
 
 const loadFeed = (link, state) => {
   state.loadingProcess.status = 'loading';
-  return axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
+  return axios.get(proxyLink(link))
     .then((response) => {
       if (response.data) {
         const {
@@ -62,7 +64,7 @@ const loadFeed = (link, state) => {
         state.loadingProcess.status = 'success';
       } else {
         state.form.isValid = false;
-        state.form.feedbackMessage = 'feedbackNoValidRSS';
+        state.form.feedbackMessage = 'errorNoValidRSS';
         state.loadingProcess.status = 'fail';
         throw new Error("Can't be loaded!");
       }
@@ -71,16 +73,16 @@ const loadFeed = (link, state) => {
       state.form.isValid = false;
       console.log('error', error);
       if (error.code === 'ECONNABORTED' || error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN' || error.code === 'ERR_NETWORK') {
-        state.form.feedbackMessage = 'feedbackNetworkError';
+        state.form.feedbackMessage = 'errorNetworkError';
       } else {
-        state.form.feedbackMessage = 'feedbackNoValidRSS';
+        state.form.feedbackMessage = 'errorNoValidRss';
       }
       state.loadingProcess.status = 'fail';
       throw (error);
     });
 };
 
-const updateFeed = (link, state) => axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`)
+const updateFeed = (link, state) => axios.get(proxyLink(link))
   .then((response) => {
     if (response.data) return response.data;
     throw new Error("Can't be loaded!");
@@ -156,50 +158,44 @@ const main = () => {
     },
   };
   const i18Inst = i18n.createInstance();
-  i18Inst.init({ resources })
+  i18Inst.init({ resources, lng: 'ru' })
     .then(() => {
-      i18Inst.changeLanguage('ru')
-        .then(() => {
-          const watchedState = onChange(state, view(state, i18Inst, elements));
-          elements.formInput.addEventListener('input', (e) => {
-            e.preventDefault();
-            watchedState.form.data = e.target.value;
-          });
-          elements.form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            validate(watchedState.form.data)
+      const watchedState = onChange(state, renderView(state, i18Inst, elements));
+      elements.formInput.addEventListener('input', (e) => {
+        e.preventDefault();
+        watchedState.form.data = e.target.value;
+      });
+      elements.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        validate(watchedState.form.data)
+          .then(() => {
+            if (!feedIsNew(watchedState.form.data, watchedState)) {
+              watchedState.form.isValid = false;
+              watchedState.form.feedbackMessage = 'feedbackAlreadyExists';
+              elements.formInput.value = '';
+              return;
+            }
+            watchedState.loadingProcess.status = 'loading';
+            loadFeed(watchedState.form.data, watchedState)
               .then(() => {
-                if (!feedIsNew(watchedState.form.data, watchedState)) {
-                  watchedState.form.isValid = false;
-                  watchedState.form.feedbackMessage = 'feedbackAlreadyExists';
-                  elements.formInput.value = '';
-                  view(watchedState, i18Inst, elements);
-                  return;
-                }
-                watchedState.loadingProcess.status = 'loading';
-                loadFeed(watchedState.form.data, watchedState)
-                  .then(() => {
-                    watchedState.loadingProcess.status = 'idle';
-                    elements.formInput.value = '';
-                    watchedState.form.data = '';
-                  })
-                  .catch(() => {
-                    watchedState.form.isValid = false;
-                    watchedState.loadingProcess.status = 'fail';
-                    elements.formInput.value = '';
-                    watchedState.form.data = '';
-                  });
-                view(watchedState, i18Inst, elements);
+                watchedState.loadingProcess.status = 'idle';
+                elements.formInput.value = '';
+                watchedState.form.data = '';
               })
               .catch(() => {
-                watchedState.form = { data: '', feedbackMessage: 'feedbackNegative', isValid: false };
+                watchedState.form.isValid = false;
                 watchedState.loadingProcess.status = 'fail';
                 elements.formInput.value = '';
-                view(watchedState, i18Inst, elements);
+                watchedState.form.data = '';
               });
+          })
+          .catch(() => {
+            watchedState.form = { data: '', feedbackMessage: 'errorNotValidUrl', isValid: false };
+            watchedState.loadingProcess.status = 'fail';
+            elements.formInput.value = '';
           });
-          startRegularUpdate(watchedState);
-        });
+      });
+      startRegularUpdate(watchedState);
     })
     .catch((error) => console.error(error));
 };
