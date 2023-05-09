@@ -52,17 +52,14 @@ const handlePostClick = (state, renderedPost) => {
 
 const controlActivePost = (state) => {
   const renderedPosts = document.querySelectorAll('.post-item');
-  console.log('rendered posts: ', renderedPosts);
-  if (renderedPosts.length > 0) {
-    renderedPosts.forEach((renderedPost) => {
-      renderedPost.querySelector('button').addEventListener('click', () => {
-        handlePostClick(state, renderedPost);
-      });
-      renderedPost.querySelector('a').addEventListener('click', () => {
-        handlePostClick(state, renderedPost);
-      });
+  renderedPosts.forEach((renderedPost) => {
+    renderedPost.querySelector('button').addEventListener('click', () => {
+      handlePostClick(state, renderedPost);
     });
-  }
+    renderedPost.querySelector('a').addEventListener('click', () => {
+      handlePostClick(state, renderedPost);
+    });
+  });
 };
 
 const loadFeed = (link, state) => {
@@ -226,7 +223,6 @@ const main = () => {
       startRegularUpdate(watchedState);
     })
     .catch((error) => console.error(error));
-
 };
 
 main();
