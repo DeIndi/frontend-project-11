@@ -1,6 +1,5 @@
 import 'bootstrap';
 import * as yup from 'yup';
-import onChange from 'on-change';
 import i18n from 'i18next';
 import axios from 'axios';
 import _ from 'lodash';
@@ -106,24 +105,18 @@ const updateFeed = (link, state) => axios.get(proxyLink(link))
     if (response.data) return response.data;
     throw new Error("Can't be loaded!");
   })
-  .catch((error) => {
-    throw (error);
-  })
   .then((data) => {
     if (!data.contents) {
       return;
     }
-    try {
-      const {
-        posts,
-      } = parseRss(data);
-      state.posts = [...state.posts, ...posts.filter(
-        (post) => !state.posts.find((oldPost) => oldPost.postLink === post.postLink),
-      )];
-      controlActivePost(state);
-    } catch (error) {
-      console.log(error);
-    }
+    const { posts } = parseRss(data);
+    state.posts = [...state.posts, ...posts.filter(
+      (post) => !state.posts.find((oldPost) => oldPost.postLink === post.postLink),
+    )];
+    controlActivePost(state);
+  })
+  .catch((error) => {
+    throw (error);
   });
 
 const startRegularUpdate = (state) => {
@@ -178,10 +171,7 @@ const main = () => {
   const i18Inst = i18n.createInstance();
   i18Inst.init({ resources, lng: 'ru' })
     .then(() => {
-      // watch - точка входа в слой view
-      // const watchedState = watch(state, i18Inst, elements);
-      // onChange внутри watch в view.js
-      const watchedState = onChange(state, watch(state, i18Inst, elements));
+      const watchedState = watch(state, i18Inst, elements);
       elements.formInput.addEventListener('input', (e) => {
         e.preventDefault();
         watchedState.form.data = e.target.value;
@@ -194,9 +184,9 @@ const main = () => {
             loadFeed(watchedState.form.data, watchedState)
               .then(() => {
                 watchedState.loadingProcess.status = 'idle';
-                elements.formInput.value = '';
                 watchedState.form.data = '';
-                // вернуть фокус
+                elements.formInput.value = '';
+                elements.formInput.autofocus = true;
               })
               .catch((err) => {
                 console.log('validation err: ', err);

@@ -1,3 +1,5 @@
+import onChange from 'on-change';
+
 const renderPosts = (state, i18Inst) => {
   if (state.posts.length <= 0) {
     return null;
@@ -36,24 +38,28 @@ const renderFeeds = (state, i18Inst) => {
         </div>`);
 };
 
+const renderForm = (state, i18Inst, elements) => {
+  const { feedbackMessage, isValid } = state.form;
+  const localizedMessage = isValid ? i18Inst.t(feedbackMessage) : i18Inst.t(`errors.${feedbackMessage}`);
+  if (feedbackMessage) {
+    elements.feedbackMessage.textContent = localizedMessage;
+    elements.formInput.classList.toggle('is-invalid', !isValid);
+    elements.feedbackMessage.classList.toggle('text-success', isValid);
+    elements.feedbackMessage.classList.toggle('text-danger', !isValid);
+  } else {
+    elements.feedbackMessage.textContent = '';
+  }
+};
+
 const render = (state, i18Inst, elements, path = '') => {
   if (path.startsWith('form')) {
-    const { feedbackMessage, isValid } = state.form;
-    const localizedMessage = isValid ? i18Inst.t(feedbackMessage) : i18Inst.t(`errors.${feedbackMessage}`);
-    if (feedbackMessage) {
-      elements.feedbackMessage.textContent = localizedMessage;
-      elements.formInput.classList.toggle('is-invalid', !isValid);
-      elements.feedbackMessage.classList.toggle('text-success', isValid);
-      elements.feedbackMessage.classList.toggle('text-danger', !isValid);
-    } else {
-      elements.feedbackMessage.textContent = '';
-    }
+    renderForm(state, i18Inst, elements);
   }
   if (path.startsWith('feeds')) {
-    elements.feeds.innerHTML = '';
     elements.feeds.innerHTML = renderFeeds(state, i18Inst);
   }
   if (path.startsWith('posts')) {
+    console.log('path: ', path);
     elements.posts.innerHTML = renderPosts(state, i18Inst);
     elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
 
@@ -70,6 +76,8 @@ const render = (state, i18Inst, elements, path = '') => {
   elements.formSubmit.disabled = isFormLoading;
 };
 
-export default (state, i18Inst, elements) => ((path) => {
+const wrapRender = (state, i18Inst, elements) => ((path) => {
   render(state, i18Inst, elements, path);
 });
+
+export default (state, i18Inst, elements) => onChange(state, wrapRender(state, i18Inst, elements));
