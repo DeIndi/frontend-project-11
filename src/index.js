@@ -5,10 +5,10 @@ import i18n from 'i18next';
 import axios from 'axios';
 import _ from 'lodash';
 import resources from './locales/locale.js';
-import renderView from './view.js';
+import watch from './view.js';
 import './index.scss';
 
-const schema = yup.string().trim().url().required();
+let schema = yup.string().trim().required().url();
 
 const validate = (url) => schema.validate(url, { abortEarly: false });
 
@@ -25,21 +25,45 @@ const parseRss = (data) => {
   const channel = rssDOM.querySelector('channel');
   const title = rssDOM.querySelector('title');
   const desc = rssDOM.querySelector('description');
-  const feedId = _.uniqueId();
   const items = channel.querySelectorAll('item');
   const posts = [...items].map((item) => ({
-    feedId,
     postId: _.uniqueId(),
     title: item.querySelector('title').textContent,
     description: item.querySelector('description').textContent,
     postLink: item.querySelector('link').textContent,
   }));
   return {
-    title, feedId, desc, posts,
+    title, desc, posts,
   };
 };
 
-const feedIsNew = (link, state) => state.feeds.filter((f) => f.link === link).length === 0;
+const changeActivePost = (state, postId) => {
+  state.modal.activePostId = postId;
+};
+
+const setPostAsViewed = (state, id) => {
+  state.uiState.posts[id] = 'viewed';
+};
+
+const handlePostClick = (state, renderedPost) => {
+  changeActivePost(state, renderedPost.getAttribute('id'));
+  setPostAsViewed(state, renderedPost.getAttribute('id'));
+};
+
+const controlActivePost = (state) => {
+  const renderedPosts = document.querySelectorAll('.post-item');
+  console.log('rendered posts: ', renderedPosts);
+  if (renderedPosts.length > 0) {
+    renderedPosts.forEach((renderedPost) => {
+      renderedPost.querySelector('button').addEventListener('click', () => {
+        handlePostClick(state, renderedPost);
+      });
+      renderedPost.querySelector('a').addEventListener('click', () => {
+        handlePostClick(state, renderedPost);
+      });
+    });
+  }
+};
 
 const loadFeed = (link, state) => {
   state.loadingProcess.status = 'loading';
@@ -47,18 +71,16 @@ const loadFeed = (link, state) => {
     .then((response) => {
       if (response.data) {
         const {
-          title, feedId, desc, posts,
+          title, desc, posts,
         } = parseRss(response.data, state);
-        if (feedIsNew(link, state)) {
-          state.feeds.push({
-            feedId, title: title.textContent, desc: desc.textContent, link,
-          });
-        }
-        posts.forEach((post) => {
-          if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
-            state.posts.push(post);
-          }
+        const feedId = _.uniqueId();
+        state.feeds.push({
+          feedId, title: title.textContent, desc: desc.textContent, link,
         });
+        schema = yup.string().trim().required().url()
+          .notOneOf(state.feeds.map((f) => f.link));
+        state.posts.push(...posts);
+        controlActivePost(state);
         state.form.isValid = true;
         state.form.feedbackMessage = 'feedbackPositive';
         state.loadingProcess.status = 'success';
@@ -97,12 +119,11 @@ const updateFeed = (link, state) => axios.get(proxyLink(link))
     try {
       const {
         posts,
-      } = parseRss(data, state);
-      posts.forEach((post) => {
-        if (!state.posts.find((oldPost) => oldPost.postLink === post.postLink)) {
-          state.posts.push(post);
-        }
-      });
+      } = parseRss(data);
+      state.posts = [...state.posts, ...posts.filter(
+        (post) => !state.posts.find((oldPost) => oldPost.postLink === post.postLink),
+      )];
+      controlActivePost(state);
     } catch (error) {
       console.log(error);
     }
@@ -160,7 +181,10 @@ const main = () => {
   const i18Inst = i18n.createInstance();
   i18Inst.init({ resources, lng: 'ru' })
     .then(() => {
-      const watchedState = onChange(state, renderView(state, i18Inst, elements));
+      // watch - точка входа в слой view
+      // const watchedState = watch(state, i18Inst, elements);
+      // onChange внутри watch в view.js
+      const watchedState = onChange(state, watch(state, i18Inst, elements));
       elements.formInput.addEventListener('input', (e) => {
         e.preventDefault();
         watchedState.form.data = e.target.value;
@@ -169,28 +193,32 @@ const main = () => {
         e.preventDefault();
         validate(watchedState.form.data)
           .then(() => {
-            if (!feedIsNew(watchedState.form.data, watchedState)) {
-              watchedState.form.isValid = false;
-              watchedState.form.feedbackMessage = 'errorAlreadyExists';
-              elements.formInput.value = '';
-              return;
-            }
             watchedState.loadingProcess.status = 'loading';
             loadFeed(watchedState.form.data, watchedState)
               .then(() => {
                 watchedState.loadingProcess.status = 'idle';
                 elements.formInput.value = '';
                 watchedState.form.data = '';
+                // вернуть фокус
               })
-              .catch(() => {
+              .catch((err) => {
+                console.log('validation err: ', err);
                 watchedState.form.isValid = false;
                 watchedState.loadingProcess.status = 'fail';
                 elements.formInput.value = '';
                 watchedState.form.data = '';
               });
           })
-          .catch(() => {
-            watchedState.form = { data: '', feedbackMessage: 'errorNotValidUrl', isValid: false };
+          .catch((error) => {
+            watchedState.form.feedbackMessage = 'errorNotValidUrl';
+            if (error.message.startsWith('this must not be one of')) {
+              watchedState.form.feedbackMessage = 'errorAlreadyExists';
+            }
+            if (!watchedState.form.data) {
+              watchedState.form.feedbackMessage = 'errorEmptyInput';
+            }
+            watchedState.form.data = '';
+            watchedState.form.isValid = false;
             watchedState.loadingProcess.status = 'fail';
             elements.formInput.value = '';
           });
@@ -198,6 +226,7 @@ const main = () => {
       startRegularUpdate(watchedState);
     })
     .catch((error) => console.error(error));
+
 };
 
 main();

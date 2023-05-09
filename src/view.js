@@ -1,11 +1,3 @@
-const changeActivePost = (state, postId) => {
-  state.modal.activePostId = postId;
-};
-
-const setPostAsViewed = (state, id) => {
-  state.uiState.posts[id] = 'viewed';
-};
-
 const renderPosts = (state, i18Inst) => {
   if (state.posts.length <= 0) {
     return null;
@@ -61,25 +53,10 @@ const render = (state, i18Inst, elements, path = '') => {
     elements.feeds.innerHTML = '';
     elements.feeds.innerHTML = renderFeeds(state, i18Inst);
   }
-  const handlePostClick = (renderedPost) => {
-    changeActivePost(state, renderedPost.getAttribute('id'));
-    setPostAsViewed(state, renderedPost.getAttribute('id'));
-    render(state, i18Inst, elements, path);
-  };
   if (path.startsWith('posts')) {
     elements.posts.innerHTML = renderPosts(state, i18Inst);
     elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
-    const renderedPosts = document.querySelectorAll('.post-item');
-    if (renderedPosts.length > 0) {
-      renderedPosts.forEach((renderedPost) => {
-        renderedPost.querySelector('button').addEventListener('click', () => {
-          handlePostClick(renderedPost);
-        });
-        renderedPost.querySelector('a').addEventListener('click', () => {
-          handlePostClick(renderedPost);
-        });
-      });
-    }
+
     const activePost = state.posts.find((post) => post.postId === state.modal.activePostId);
     if (activePost) {
       const { title, description, postLink } = activePost;
