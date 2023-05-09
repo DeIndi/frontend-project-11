@@ -73,7 +73,7 @@ const loadFeed = (link, state) => {
       state.form.isValid = false;
       console.log('error', error);
       if (error.code === 'ECONNABORTED' || error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN' || error.code === 'ERR_NETWORK') {
-        state.form.feedbackMessage = 'errorNetworkError';
+        state.form.feedbackMessage = 'errorNetwork';
       } else {
         state.form.feedbackMessage = 'errorNoValidRss';
       }
