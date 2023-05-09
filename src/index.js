@@ -64,7 +64,7 @@ const loadFeed = (link, state) => {
         state.loadingProcess.status = 'success';
       } else {
         state.form.isValid = false;
-        state.form.feedbackMessage = 'errorNoValidRSS';
+        state.form.feedbackMessage = 'errorNoValidRss';
         state.loadingProcess.status = 'fail';
         throw new Error("Can't be loaded!");
       }
@@ -171,7 +171,7 @@ const main = () => {
           .then(() => {
             if (!feedIsNew(watchedState.form.data, watchedState)) {
               watchedState.form.isValid = false;
-              watchedState.form.feedbackMessage = 'feedbackAlreadyExists';
+              watchedState.form.feedbackMessage = 'errorAlreadyExists';
               elements.formInput.value = '';
               return;
             }

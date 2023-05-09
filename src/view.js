@@ -61,22 +61,22 @@ const render = (state, i18Inst, elements, path = '') => {
     elements.feeds.innerHTML = '';
     elements.feeds.innerHTML = renderFeeds(state, i18Inst);
   }
+  const handlePostClick = (renderedPost) => {
+    changeActivePost(state, renderedPost.getAttribute('id'));
+    setPostAsViewed(state, renderedPost.getAttribute('id'));
+    render(state, i18Inst, elements, path);
+  };
   if (path.startsWith('posts')) {
-    elements.posts.innerHTML = '';
     elements.posts.innerHTML = renderPosts(state, i18Inst);
     elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
     const renderedPosts = document.querySelectorAll('.post-item');
     if (renderedPosts.length > 0) {
       renderedPosts.forEach((renderedPost) => {
         renderedPost.querySelector('button').addEventListener('click', () => {
-          changeActivePost(state, renderedPost.getAttribute('id'));
-          setPostAsViewed(state, renderedPost.getAttribute('id'));
-          render(state, i18Inst, elements, path);
+          handlePostClick(renderedPost);
         });
         renderedPost.querySelector('a').addEventListener('click', () => {
-          changeActivePost(state, renderedPost.getAttribute('id'));
-          setPostAsViewed(state, renderedPost.getAttribute('id'));
-          render(state, i18Inst, elements, path);
+          handlePostClick(renderedPost);
         });
       });
     }
@@ -85,15 +85,12 @@ const render = (state, i18Inst, elements, path = '') => {
       const { title, description, postLink } = activePost;
       elements.modalHeader.innerHTML = title;
       elements.modalBody.innerHTML = description;
-      elements.fullArticle.setAttribute('href', postLink);
+      elements.fullArticle.href = postLink;
     }
   }
 
-  if (state.loadingProcess.status === 'loading') {
-    elements.formSubmit.setAttribute('disabled', 'disabled');
-  } else {
-    elements.formSubmit.removeAttribute('disabled');
-  }
+  const isFormLoading = state.loadingProcess.status === 'loading';
+  elements.formSubmit.disabled = isFormLoading;
 };
 
 export default (state, i18Inst, elements) => ((path) => {
