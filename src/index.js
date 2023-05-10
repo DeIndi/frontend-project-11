@@ -9,6 +9,8 @@ import './index.scss';
 
 let schema = yup.string().trim().required().url();
 
+const errCodes = ['ECONNABORTED', 'ENOTFOUND', 'EAI_AGAIN', 'ERR_NETWORK'];
+
 const validate = (url) => schema.validate(url, { abortEarly: false });
 
 const proxyLink = (link) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`;
@@ -18,7 +20,6 @@ const parseRss = (data) => {
   const rssDOM = parser.parseFromString(data.contents, 'text/xml');
   const errorNode = rssDOM.querySelector('parsererror');
   if (errorNode) {
-    console.log('parsing error');
     throw new Error('Incorrect document type');
   }
   const channel = rssDOM.querySelector('channel');
@@ -68,9 +69,7 @@ const loadFeed = (link, state) => {
       if (!response.data) {
         throw new Error("Can't be loaded!");
       }
-      const {
-        title, desc, posts,
-      } = parseRss(response.data, state);
+      const { title, desc, posts } = parseRss(response.data, state);
       const feedId = _.uniqueId();
       state.feeds.push({
         feedId, title: title.textContent, desc: desc.textContent, link,
@@ -85,11 +84,7 @@ const loadFeed = (link, state) => {
     })
     .catch((error) => {
       state.form.isValid = false;
-      if (error.code === 'ECONNABORTED' || error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN' || error.code === 'ERR_NETWORK') {
-        state.form.feedbackMessage = 'errorNetwork';
-      } else {
-        state.form.feedbackMessage = 'errorNoValidRss';
-      }
+      state.form.feedbackMessage = errCodes.includes(error.code) ? 'errorNetwork' : 'errorNoValidRss';
       state.loadingProcess.status = 'fail';
       throw new Error(error);
     });
@@ -126,30 +121,29 @@ const startRegularUpdate = (state) => {
   return checkFeeds();
 };
 
+const validateFormData = (watchedState) => validate(watchedState.form.data)
+  .catch((error) => {
+    watchedState.form.feedbackMessage = 'errorNotValidUrl';
+    if (error.message.startsWith('this must not be one of')) {
+      watchedState.form.feedbackMessage = 'errorAlreadyExists';
+    }
+    if (!watchedState.form.data) {
+      watchedState.form.feedbackMessage = 'errorEmptyInput';
+    }
+    watchedState.form.isValid = false;
+    watchedState.loadingProcess.status = 'fail';
+    throw error;
+  });
+
 const submitForm = (event, watchedState, formInput) => {
   event.preventDefault();
-
-  return validate(watchedState.form.data)
-    .then(() => {
-      watchedState.loadingProcess.status = 'loading';
-      return loadFeed(watchedState.form.data, watchedState);
-    })
-    .then(() => {
-      watchedState.loadingProcess.status = 'idle';
-    })
+  validateFormData(watchedState)
+    .then(() => loadFeed(watchedState.form.data, watchedState))
     .catch((error) => {
-      watchedState.form.feedbackMessage = 'errorNotValidUrl';
-      if (error.message.startsWith('this must not be one of')) {
-        watchedState.form.feedbackMessage = 'errorAlreadyExists';
-      }
-      if (!watchedState.form.data) {
-        watchedState.form.feedbackMessage = 'errorEmptyInput';
-      }
-      watchedState.form.isValid = false;
-      watchedState.loadingProcess.status = 'fail';
-      throw error;
+      console.error(error);
     })
     .finally(() => {
+      watchedState.loadingProcess.status = 'idle';
       formInput.autofocus = true;
       watchedState.form.data = '';
       formInput.value = '';
@@ -158,15 +152,12 @@ const submitForm = (event, watchedState, formInput) => {
 
 const main = () => {
   const elements = {
-    innerHeader: document.querySelector('h1'),
-    announcementP: document.querySelector('.lead'),
     form: document.querySelector('form'),
     formInput: document.getElementById('url-input'),
     formSubmit: document.querySelector('button[type="submit"]'),
     feedbackMessage: document.querySelector('.feedback'),
     feeds: document.querySelector('.feeds'),
     feedsHeader: document.querySelector('.feeds').querySelector('.h4'),
-    feedsTitle: document.querySelector('.feeds').querySelector('.h6'),
     feedsDescription: document.querySelector('.feeds').querySelector('.text-black-50'),
     posts: document.querySelector('.posts'),
     fullArticle: document.querySelector('.full-article'),
@@ -180,7 +171,6 @@ const main = () => {
     },
     form: {
       data: '',
-      lastFeed: '',
       feedbackMessage: null,
       isValid: false,
     },
