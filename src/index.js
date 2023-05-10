@@ -49,7 +49,7 @@ const handlePostClick = (state, renderedPost) => {
   setPostAsViewed(state, renderedPost.getAttribute('id'));
 };
 
-const controlActivePost = (state) => {
+const handleActivePost = (state) => {
   const renderedPosts = document.querySelectorAll('.post-item');
   renderedPosts.forEach((renderedPost) => {
     renderedPost.querySelector('button').addEventListener('click', () => {
@@ -65,31 +65,26 @@ const loadFeed = (link, state) => {
   state.loadingProcess.status = 'loading';
   return axios.get(proxyLink(link))
     .then((response) => {
-      if (response.data) {
-        const {
-          title, desc, posts,
-        } = parseRss(response.data, state);
-        const feedId = _.uniqueId();
-        state.feeds.push({
-          feedId, title: title.textContent, desc: desc.textContent, link,
-        });
-        schema = yup.string().trim().required().url()
-          .notOneOf(state.feeds.map((f) => f.link));
-        state.posts.push(...posts);
-        controlActivePost(state);
-        state.form.isValid = true;
-        state.form.feedbackMessage = 'feedbackPositive';
-        state.loadingProcess.status = 'success';
-      } else {
-        state.form.isValid = false;
-        state.form.feedbackMessage = 'errorNoValidRss';
-        state.loadingProcess.status = 'fail';
+      if (!response.data) {
         throw new Error("Can't be loaded!");
       }
+      const {
+        title, desc, posts,
+      } = parseRss(response.data, state);
+      const feedId = _.uniqueId();
+      state.feeds.push({
+        feedId, title: title.textContent, desc: desc.textContent, link,
+      });
+      schema = yup.string().trim().required().url()
+        .notOneOf(state.feeds.map((f) => f.link));
+      state.posts.push(...posts);
+      handleActivePost(state);
+      state.form.isValid = true;
+      state.form.feedbackMessage = 'feedbackPositive';
+      state.loadingProcess.status = 'success';
     })
     .catch((error) => {
       state.form.isValid = false;
-      console.log('error', error);
       if (error.code === 'ECONNABORTED' || error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN' || error.code === 'ERR_NETWORK') {
         state.form.feedbackMessage = 'errorNetwork';
       } else {
@@ -113,7 +108,7 @@ const updateFeed = (link, state) => axios.get(proxyLink(link))
     state.posts = [...state.posts, ...posts.filter(
       (post) => !state.posts.find((oldPost) => oldPost.postLink === post.postLink),
     )];
-    controlActivePost(state);
+    handleActivePost(state);
   })
   .catch((error) => {
     throw (error);

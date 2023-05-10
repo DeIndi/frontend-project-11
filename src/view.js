@@ -51,6 +51,18 @@ const renderForm = (state, i18Inst, elements) => {
   }
 };
 
+const renderModal = (state, elements) => {
+  const activePost = state.posts.find((post) => post.postId === state.modal.activePostId);
+  if (!activePost) {
+    return null;
+  }
+  const { title, description, postLink } = activePost;
+  elements.modalHeader.innerHTML = title;
+  elements.modalBody.innerHTML = description;
+  elements.fullArticle.href = postLink;
+  return null;
+};
+
 const render = (state, i18Inst, elements, path = '') => {
   if (path.startsWith('form')) {
     renderForm(state, i18Inst, elements);
@@ -59,19 +71,10 @@ const render = (state, i18Inst, elements, path = '') => {
     elements.feeds.innerHTML = renderFeeds(state, i18Inst);
   }
   if (path.startsWith('posts')) {
-    console.log('path: ', path);
     elements.posts.innerHTML = renderPosts(state, i18Inst);
     elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
-
-    const activePost = state.posts.find((post) => post.postId === state.modal.activePostId);
-    if (activePost) {
-      const { title, description, postLink } = activePost;
-      elements.modalHeader.innerHTML = title;
-      elements.modalBody.innerHTML = description;
-      elements.fullArticle.href = postLink;
-    }
   }
-
+  renderModal(state, elements);
   const isFormLoading = state.loadingProcess.status === 'loading';
   elements.formSubmit.disabled = isFormLoading;
 };
