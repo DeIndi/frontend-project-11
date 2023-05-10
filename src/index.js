@@ -9,9 +9,9 @@ import './index.scss';
 
 let schema = yup.string().trim().required().url();
 
-const errCodes = ['ECONNABORTED', 'ENOTFOUND', 'EAI_AGAIN', 'ERR_NETWORK'];
+const errorCodes = ['ECONNABORTED', 'ENOTFOUND', 'EAI_AGAIN', 'ERR_NETWORK'];
 
-const validate = (url) => schema.validate(url, { abortEarly: false });
+const validateLink = (url) => schema.validate(url, { abortEarly: false });
 
 const proxyLink = (link) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`;
 
@@ -84,9 +84,9 @@ const loadFeed = (link, state) => {
     })
     .catch((error) => {
       state.form.isValid = false;
-      state.form.feedbackMessage = errCodes.includes(error.code) ? 'errorNetwork' : 'errorNoValidRss';
+      state.form.feedbackMessage = errorCodes.includes(error.code) ? 'errorNetwork' : 'errorNoValidRss';
       state.loadingProcess.status = 'fail';
-      throw new Error(error);
+      throw error;
     });
 };
 
@@ -106,7 +106,7 @@ const updateFeed = (link, state) => axios.get(proxyLink(link))
     handleActivePost(state);
   })
   .catch((error) => {
-    throw (error);
+    throw error;
   });
 
 const startRegularUpdate = (state) => {
@@ -116,12 +116,12 @@ const startRegularUpdate = (state) => {
       .then(() => {
         setTimeout(checkFeeds, 5000);
       })
-      .catch((e) => console.log('Error while checking feeds: ', e));
+      .catch((error) => console.error(error));
   };
   return checkFeeds();
 };
 
-const validateFormData = (watchedState) => validate(watchedState.form.data)
+const validateFormData = (watchedState) => validateLink(watchedState.form.data)
   .catch((error) => {
     watchedState.form.feedbackMessage = 'errorNotValidUrl';
     if (error.message.startsWith('this must not be one of')) {
