@@ -91,7 +91,7 @@ const loadFeed = (link, state) => {
         state.form.feedbackMessage = 'errorNoValidRss';
       }
       state.loadingProcess.status = 'fail';
-      throw (error);
+      throw new Error(error);
     });
 };
 
@@ -128,23 +128,14 @@ const startRegularUpdate = (state) => {
 
 const submitForm = (event, watchedState, formInput) => {
   event.preventDefault();
-  validate(watchedState.form.data)
+
+  return validate(watchedState.form.data)
     .then(() => {
       watchedState.loadingProcess.status = 'loading';
-      loadFeed(watchedState.form.data, watchedState)
-        .then(() => {
-          watchedState.loadingProcess.status = 'idle';
-          watchedState.form.data = '';
-          formInput.value = '';
-          formInput.autofocus = true;
-        })
-        .catch((err) => {
-          console.log('validation err: ', err);
-          watchedState.form.isValid = false;
-          watchedState.loadingProcess.status = 'fail';
-          formInput.value = '';
-          watchedState.form.data = '';
-        });
+      return loadFeed(watchedState.form.data, watchedState);
+    })
+    .then(() => {
+      watchedState.loadingProcess.status = 'idle';
     })
     .catch((error) => {
       watchedState.form.feedbackMessage = 'errorNotValidUrl';
@@ -154,9 +145,13 @@ const submitForm = (event, watchedState, formInput) => {
       if (!watchedState.form.data) {
         watchedState.form.feedbackMessage = 'errorEmptyInput';
       }
-      watchedState.form.data = '';
       watchedState.form.isValid = false;
       watchedState.loadingProcess.status = 'fail';
+      throw error;
+    })
+    .finally(() => {
+      formInput.autofocus = true;
+      watchedState.form.data = '';
       formInput.value = '';
     });
 };
