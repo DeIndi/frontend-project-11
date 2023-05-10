@@ -126,6 +126,46 @@ const startRegularUpdate = (state) => {
   return checkFeeds();
 };
 
+const submitForm = (event, watchedState, formInput) => {
+  event.preventDefault();
+
+  validate(watchedState.form.data)
+    .then(() => {
+      watchedState.loadingProcess.status = 'loading';
+
+      loadFeed(watchedState.form.data, watchedState)
+        .then(() => {
+          watchedState.loadingProcess.status = 'idle';
+          watchedState.form.data = '';
+          formInput.value = '';
+          formInput.autofocus = true;
+        })
+        .catch((err) => {
+          console.log('validation err: ', err);
+          watchedState.form.isValid = false;
+          watchedState.loadingProcess.status = 'fail';
+          formInput.value = '';
+          watchedState.form.data = '';
+        });
+    })
+    .catch((error) => {
+      watchedState.form.feedbackMessage = 'errorNotValidUrl';
+
+      if (error.message.startsWith('this must not be one of')) {
+        watchedState.form.feedbackMessage = 'errorAlreadyExists';
+      }
+
+      if (!watchedState.form.data) {
+        watchedState.form.feedbackMessage = 'errorEmptyInput';
+      }
+
+      watchedState.form.data = '';
+      watchedState.form.isValid = false;
+      watchedState.loadingProcess.status = 'fail';
+      formInput.value = '';
+    });
+};
+
 const main = () => {
   const elements = {
     innerHeader: document.querySelector('h1'),
@@ -167,44 +207,15 @@ const main = () => {
   i18Inst.init({ resources, lng: 'ru' })
     .then(() => {
       const watchedState = watch(state, i18Inst, elements);
-      elements.formInput.addEventListener('input', (e) => {
+      const { formInput, form } = elements;
+
+      formInput.addEventListener('input', (e) => {
         e.preventDefault();
         watchedState.form.data = e.target.value;
       });
-      elements.form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        validate(watchedState.form.data)
-          .then(() => {
-            watchedState.loadingProcess.status = 'loading';
-            loadFeed(watchedState.form.data, watchedState)
-              .then(() => {
-                watchedState.loadingProcess.status = 'idle';
-                watchedState.form.data = '';
-                elements.formInput.value = '';
-                elements.formInput.autofocus = true;
-              })
-              .catch((err) => {
-                console.log('validation err: ', err);
-                watchedState.form.isValid = false;
-                watchedState.loadingProcess.status = 'fail';
-                elements.formInput.value = '';
-                watchedState.form.data = '';
-              });
-          })
-          .catch((error) => {
-            watchedState.form.feedbackMessage = 'errorNotValidUrl';
-            if (error.message.startsWith('this must not be one of')) {
-              watchedState.form.feedbackMessage = 'errorAlreadyExists';
-            }
-            if (!watchedState.form.data) {
-              watchedState.form.feedbackMessage = 'errorEmptyInput';
-            }
-            watchedState.form.data = '';
-            watchedState.form.isValid = false;
-            watchedState.loadingProcess.status = 'fail';
-            elements.formInput.value = '';
-          });
-      });
+
+      form.addEventListener('submit', (e) => submitForm(e, watchedState, formInput));
+
       startRegularUpdate(watchedState);
     })
     .catch((error) => console.error(error));
