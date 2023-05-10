@@ -128,11 +128,9 @@ const startRegularUpdate = (state) => {
 
 const submitForm = (event, watchedState, formInput) => {
   event.preventDefault();
-
   validate(watchedState.form.data)
     .then(() => {
       watchedState.loadingProcess.status = 'loading';
-
       loadFeed(watchedState.form.data, watchedState)
         .then(() => {
           watchedState.loadingProcess.status = 'idle';
@@ -150,15 +148,12 @@ const submitForm = (event, watchedState, formInput) => {
     })
     .catch((error) => {
       watchedState.form.feedbackMessage = 'errorNotValidUrl';
-
       if (error.message.startsWith('this must not be one of')) {
         watchedState.form.feedbackMessage = 'errorAlreadyExists';
       }
-
       if (!watchedState.form.data) {
         watchedState.form.feedbackMessage = 'errorEmptyInput';
       }
-
       watchedState.form.data = '';
       watchedState.form.isValid = false;
       watchedState.loadingProcess.status = 'fail';
@@ -208,14 +203,11 @@ const main = () => {
     .then(() => {
       const watchedState = watch(state, i18Inst, elements);
       const { formInput, form } = elements;
-
       formInput.addEventListener('input', (e) => {
         e.preventDefault();
         watchedState.form.data = e.target.value;
       });
-
       form.addEventListener('submit', (e) => submitForm(e, watchedState, formInput));
-
       startRegularUpdate(watchedState);
     })
     .catch((error) => console.error(error));
