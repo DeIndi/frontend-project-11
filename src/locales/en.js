@@ -1,4 +1,4 @@
-export default {
+const translationEn = {
   translation: {
     english: 'English',
     russian: 'Русский',
@@ -20,3 +20,5 @@ export default {
     },
   },
 };
+
+export default translationEn;

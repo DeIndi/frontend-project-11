@@ -1,4 +1,4 @@
-export default {
+const translationRu = {
   translation: {
     english: 'English',
     russian: 'Русский',
@@ -20,4 +20,5 @@ export default {
     },
   },
 };
-// многоуровневый словарь
+
+export default translationRu;
