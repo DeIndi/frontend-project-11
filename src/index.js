@@ -7,7 +7,8 @@ import resources from './locales/locale.js';
 import watch from './view.js';
 import './index.scss';
 
-let schema = yup.string().trim().required().url();
+const baseSchema = yup.string().trim().required().url();
+let schema = baseSchema;
 
 const errorCodes = ['ECONNABORTED', 'ENOTFOUND', 'EAI_AGAIN', 'ERR_NETWORK'];
 
@@ -37,29 +38,18 @@ const parseRss = (data) => {
   };
 };
 
-const changeActivePost = (state, postId) => {
-  state.modal.activePostId = postId;
+const changeActivePost = (state, id) => {
+  state.modal.activePostId = id;
 };
 
 const setPostAsViewed = (state, id) => {
-  state.uiState.posts[id] = 'viewed';
+  state.uiState.viewedPosts[id] = true;
 };
 
-const handlePostClick = (state, renderedPost) => {
-  changeActivePost(state, renderedPost.getAttribute('id'));
-  setPostAsViewed(state, renderedPost.getAttribute('id'));
-};
-
-const handleActivePost = (state) => {
-  const renderedPosts = document.querySelectorAll('.post-item');
-  renderedPosts.forEach((renderedPost) => {
-    renderedPost.querySelector('button').addEventListener('click', () => {
-      handlePostClick(state, renderedPost);
-    });
-    renderedPost.querySelector('a').addEventListener('click', () => {
-      handlePostClick(state, renderedPost);
-    });
-  });
+const handlePostClick = (state, event) => {
+  const postId = event.target.getAttribute('data-id');
+  changeActivePost(state, postId);
+  setPostAsViewed(state, postId);
 };
 
 const loadFeed = (link, state) => {
@@ -74,13 +64,10 @@ const loadFeed = (link, state) => {
       state.feeds.push({
         feedId, title: title.textContent, desc: desc.textContent, link,
       });
-      schema = yup.string().trim().required().url()
-        .notOneOf(state.feeds.map((f) => f.link));
+      schema = baseSchema.notOneOf(state.feeds.map((f) => f.link));
       state.posts.push(...posts);
-      handleActivePost(state);
-      state.form.isValid = true;
-      state.form.feedbackMessage = 'feedbackPositive';
-      state.loadingProcess.status = 'success';
+      state.loadingProcess = { status: 'success' };
+      state.form = { ...state.form, isValid: true, feedbackMessage: 'feedbackPositive' };
     })
     .catch((error) => {
       state.form.isValid = false;
@@ -103,7 +90,6 @@ const updateFeed = (link, state) => axios.get(proxyLink(link))
     state.posts = [...state.posts, ...posts.filter(
       (post) => !state.posts.find((oldPost) => oldPost.postLink === post.postLink),
     )];
-    handleActivePost(state);
   })
   .catch((error) => {
     throw error;
@@ -143,9 +129,8 @@ const submitForm = (event, watchedState, formInput) => {
       console.error(error);
     })
     .finally(() => {
-      watchedState.loadingProcess.status = 'idle';
-      formInput.autofocus = true;
-      watchedState.form.data = '';
+      watchedState.loadingProcess = { status: 'idle' };
+      watchedState.form = { ...watchedState.form, data: '' };
       formInput.value = '';
     });
 };
@@ -180,19 +165,21 @@ const main = () => {
     feeds: [],
     posts: [],
     uiState: {
-      posts: [],
+      viewedPosts: {},
     },
   };
   const i18Inst = i18n.createInstance();
   i18Inst.init({ resources, lng: 'ru' })
     .then(() => {
       const watchedState = watch(state, i18Inst, elements);
-      const { formInput, form } = elements;
-      formInput.addEventListener('input', (e) => {
+      elements.formInput.addEventListener('input', (e) => {
         e.preventDefault();
         watchedState.form.data = e.target.value;
       });
-      form.addEventListener('submit', (e) => submitForm(e, watchedState, formInput));
+      elements.form.addEventListener('submit', (e) => submitForm(e, watchedState, elements.formInput));
+      elements.posts.addEventListener('click', (event) => {
+        handlePostClick(watchedState, event);
+      });
       startRegularUpdate(watchedState);
     })
     .catch((error) => console.error(error));

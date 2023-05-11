@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import _ from 'lodash';
 
 const renderPosts = (state, i18Inst) => {
   if (state.posts.length <= 0) {
@@ -11,11 +12,11 @@ const renderPosts = (state, i18Inst) => {
     </div>
     <ul class="list-group border-0 rounded-0">
       ${state.posts.map(({ title, postId, postLink }) => `
-        <li id="${postId}" class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
-          <a href="${postLink}" class="${state.uiState.posts[postId] === 'viewed' ? 'fw-normal' : 'fw-bold'}" data-id="2" target="_blank" rel="noopener noreferrer">
+        <li class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
+          <a href="${postLink}" class="${_.has(state.uiState.viewedPosts, postId) ? 'fw-normal' : 'fw-bold'}" data-id="${postId}" target="_blank" rel="noopener noreferrer">
             ${title}
           </a>
-          <button type="button" class="btn btn-outline-primary btn-sm" data-id="2" data-bs-toggle="modal" data-bs-target="#modal">
+          <button type="button" class="btn btn-outline-primary btn-sm" data-id="${postId}" data-bs-toggle="modal" data-bs-target="#modal">
             ${i18Inst.t('view')}
           </button>
         </li>
@@ -70,12 +71,13 @@ const render = (state, i18Inst, elements, path = '') => {
   if (path.startsWith('feeds')) {
     elements.feeds.innerHTML = renderFeeds(state, i18Inst);
   }
-  if (path.startsWith('posts')) {
+  if (path.startsWith('posts') || path.startsWith('uiState')) {
     elements.posts.innerHTML = renderPosts(state, i18Inst);
-    elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
   }
+  elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
   renderModal(state, elements);
   const isFormLoading = state.loadingProcess.status === 'loading';
+  elements.formInput.focus();
   elements.formSubmit.disabled = isFormLoading;
 };
 
