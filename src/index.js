@@ -7,12 +7,14 @@ import resources from './locales/locale.js';
 import watch from './view.js';
 import './index.scss';
 
-const baseSchema = yup.string().trim().required().url();
-let schema = baseSchema;
-
 const errorCodes = ['ECONNABORTED', 'ENOTFOUND', 'EAI_AGAIN', 'ERR_NETWORK'];
 
-const validateLink = (url) => schema.validate(url, { abortEarly: false });
+const validate = (url, feeds) => {
+  const schema = yup.string().trim().required().url()
+    .notOneOf(feeds.map((f) => f.link));
+  return schema
+    .validate(url, { abortEarly: false });
+};
 
 const proxyLink = (link) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`;
 
@@ -42,14 +44,14 @@ const changeActivePost = (state, id) => {
   state.modal.activePostId = id;
 };
 
-const setPostAsViewed = (state, id) => {
-  state.uiState.viewedPosts[id] = true;
+const markLinkAsViewed = (state, id) => {
+  state.uiState.viewedPosts.add(id);
 };
 
 const handlePostClick = (state, event) => {
   const postId = event.target.getAttribute('data-id');
   changeActivePost(state, postId);
-  setPostAsViewed(state, postId);
+  markLinkAsViewed(state, postId);
 };
 
 const loadFeed = (link, state) => {
@@ -64,16 +66,15 @@ const loadFeed = (link, state) => {
       state.feeds.push({
         feedId, title: title.textContent, desc: desc.textContent, link,
       });
-      schema = baseSchema.notOneOf(state.feeds.map((f) => f.link));
       state.posts.push(...posts);
       state.loadingProcess = { status: 'success' };
-      state.form = { ...state.form, isValid: true, feedbackMessage: 'feedbackPositive' };
     })
     .catch((error) => {
-      state.form.isValid = false;
-      state.form.feedbackMessage = errorCodes.includes(error.code) ? 'errorNetwork' : 'errorNoValidRss';
-      state.loadingProcess.status = 'fail';
+      state.loadingProcess = { status: 'fail', error: errorCodes.includes(error.code) ? 'errorNetwork' : 'errorNoValidRss' };
       throw error;
+    })
+    .finally(() => {
+      // state.form.isValid = false;
     });
 };
 
@@ -107,31 +108,35 @@ const startRegularUpdate = (state) => {
   return checkFeeds();
 };
 
-const validateFormData = (watchedState) => validateLink(watchedState.form.data)
-  .catch((error) => {
-    watchedState.form.feedbackMessage = 'errorNotValidUrl';
-    if (error.message.startsWith('this must not be one of')) {
-      watchedState.form.feedbackMessage = 'errorAlreadyExists';
-    }
-    if (!watchedState.form.data) {
-      watchedState.form.feedbackMessage = 'errorEmptyInput';
-    }
-    watchedState.form.isValid = false;
-    watchedState.loadingProcess.status = 'fail';
-    throw error;
-  });
+const validateFormData = (watchedState) =>
+  validate(watchedState.form.data, watchedState.feeds)
+    .then(() => null)
+    .catch((error) => error);
 
-const submitForm = (event, watchedState, formInput) => {
+const handleSubmitForm = (event, watchedState) => {
   event.preventDefault();
   validateFormData(watchedState)
-    .then(() => loadFeed(watchedState.form.data, watchedState))
+    .then((validationError) => {
+      if (validationError) {
+        let errorMessage = 'errorNotValidUrl';
+        if (validationError.message.startsWith('this must not be one of')) {
+          errorMessage = 'errorAlreadyExists';
+        }
+        if (validationError.message.startsWith('this is a required')) {
+          errorMessage = 'errorEmptyInput';
+        }
+        watchedState.form = { ...watchedState.form, isValid: false, error: errorMessage };
+      } else {
+        watchedState.form = { ...watchedState.form, isValid: true, error: null };
+        loadFeed(watchedState.form.data, watchedState);
+      }
+    })
     .catch((error) => {
       console.error(error);
     })
     .finally(() => {
       watchedState.loadingProcess = { status: 'idle' };
       watchedState.form = { ...watchedState.form, data: '' };
-      formInput.value = '';
     });
 };
 
@@ -152,12 +157,13 @@ const main = () => {
   const state = {
     language: 'en',
     loadingProcess: {
+      error: null,
       status: 'idle',
     },
     form: {
       data: '',
-      feedbackMessage: null,
-      isValid: false,
+      isValid: true,
+      error: null,
     },
     modal: {
       activePostId: null,
@@ -165,7 +171,7 @@ const main = () => {
     feeds: [],
     posts: [],
     uiState: {
-      viewedPosts: {},
+      viewedPosts: new Set(),
     },
   };
   const i18Inst = i18n.createInstance();
@@ -176,10 +182,8 @@ const main = () => {
         e.preventDefault();
         watchedState.form.data = e.target.value;
       });
-      elements.form.addEventListener('submit', (e) => submitForm(e, watchedState, elements.formInput));
-      elements.posts.addEventListener('click', (event) => {
-        handlePostClick(watchedState, event);
-      });
+      elements.form.addEventListener('submit', (event) => handleSubmitForm(event, watchedState));
+      elements.posts.addEventListener('click', (event) => handlePostClick(watchedState, event));
       startRegularUpdate(watchedState);
     })
     .catch((error) => console.error(error));

@@ -8,7 +8,7 @@ export default {
     posts: 'Посты',
     announcement: 'Начните читать RSS сегодня! Это легко, это красиво.',
     rssAggregator: 'RSS агрегатор',
-    feedbackPositive: 'RSS успешно загружен',
+    rssLoadingSuccess: 'RSS успешно загружен',
     view: 'Просмотр',
     fullArticle: 'Читать полностью',
     errors: {
