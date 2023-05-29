@@ -108,10 +108,9 @@ const startRegularUpdate = (state) => {
   return checkFeeds();
 };
 
-const validateFormData = (watchedState) =>
-  validate(watchedState.form.data, watchedState.feeds)
-    .then(() => null)
-    .catch((error) => error);
+const validateFormData = (watchedState) => validate(watchedState.form.data, watchedState.feeds)
+  .then(() => null)
+  .catch((error) => error);
 
 const handleSubmitForm = (event, watchedState) => {
   event.preventDefault();

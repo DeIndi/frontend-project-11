@@ -102,7 +102,7 @@ const handleModal = (state, elements, i18Inst) => {
   return null;
 };
 
-const handleFeedsSection = (state, elements, i18Inst,) => {
+const handleFeedsSection = (state, elements, i18Inst) => {
   elements.feeds.innerHTML = renderFeeds(state, i18Inst);
 };
 
