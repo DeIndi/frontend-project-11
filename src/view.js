@@ -76,8 +76,8 @@ const handleLoadingProcess = (state, elements, i18Inst) => {
       elements.formSubmit.disabled = false;
       break;
     case 'fail':
-      console.log('state.form.error: ', state.form);
-      renderFeedback(elements, 'danger', i18Inst.t(`errors.${state.form.error}`));
+      console.log('state.form.error: ', state.loadingProcess);
+      renderFeedback(elements, 'danger', i18Inst.t(`errors.${state.loadingProcess.error}`));
       elements.formSubmit.disabled = false;
       break;
     case 'loading':
