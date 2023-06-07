@@ -122,7 +122,9 @@ const validateFeedUrl = (feedUrl, watchedState) => validate(feedUrl, watchedStat
 
 const handleSubmitForm = (event, watchedState) => {
   event.preventDefault();
-  validateFeedUrl(document.getElementById('url-input').value, watchedState)
+  const formData = new FormData(event.target);
+  const input = formData.get('url');
+  validateFeedUrl(input, watchedState)
     .then((validationError) => {
       if (validationError) {
         let errorMessage = 'errorNotValidUrl';
