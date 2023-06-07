@@ -7,15 +7,17 @@ import resources from './locales/locale.js';
 import watch from './view.js';
 
 const networkErrorCodes = ['ECONNABORTED', 'ENOTFOUND', 'EAI_AGAIN', 'ERR_NETWORK'];
+const proxyServer = 'https://allorigins.hexlet.app/';
+const updateTimeout = 5000;
 
 const validate = (url, feeds) => {
-  const schema = yup.string().trim().required().url()
-    .notOneOf(feeds.map((f) => f.link));
+  const schema = yup.string().trim().required('required').url('url')
+    .notOneOf(feeds.map((f) => f.link), 'exists');
   return schema
     .validate(url, { abortEarly: false });
 };
 
-const proxyLink = (link) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}&disableCache=true`;
+const proxifyLink = (link) => `${proxyServer}get?url=${encodeURIComponent(link)}&disableCache=true`;
 
 const parseRss = (data) => {
   const parser = new DOMParser();
@@ -45,19 +47,19 @@ const changeActivePost = (state, id) => {
   state.modal.activePostId = id;
 };
 
-const markLinkAsViewed = (state, id) => {
+const markPostAsViewed = (state, id) => {
   state.uiState.viewedPosts.add(id);
 };
 
 const handlePostClick = (state, event) => {
   const postId = event.target.getAttribute('data-id');
   changeActivePost(state, postId);
-  markLinkAsViewed(state, postId);
+  markPostAsViewed(state, postId);
 };
 
 const loadFeed = (link, state) => {
   state.loadingProcess.status = 'loading';
-  return axios.get(proxyLink(link))
+  return axios.get(proxifyLink(link))
     .then((response) => {
       if (!response.data) {
         throw new Error("Can't be loaded!");
@@ -80,7 +82,7 @@ const loadFeed = (link, state) => {
     });
 };
 
-const updateFeed = (link, state) => axios.get(proxyLink(link))
+const updateFeed = (link, state) => axios.get(proxifyLink(link))
   .then((response) => {
     if (response.data) return response.data;
     throw new Error("Can't be loaded!");
@@ -103,27 +105,31 @@ const startRegularUpdate = (state) => {
     const resultFeeds = state.feeds.map((feed) => updateFeed(feed.link, state));
     return Promise.allSettled(resultFeeds)
       .then(() => {
-        setTimeout(checkFeeds, 5000);
+        setTimeout(checkFeeds, updateTimeout);
       })
       .catch((error) => console.error(error));
   };
   return checkFeeds();
 };
 
-const validateFormData = (watchedState) => validate(watchedState.form.data, watchedState.feeds)
+const validateFeedUrl = (feedUrl, watchedState) => validate(feedUrl, watchedState.feeds)
   .then(() => null)
-  .catch((error) => error);
+  .catch((error) => {
+    error.code = error.message;
+    console.log('validation error: ', error);
+    return error;
+  });
 
 const handleSubmitForm = (event, watchedState) => {
   event.preventDefault();
-  validateFormData(watchedState)
+  validateFeedUrl(document.getElementById('url-input').value, watchedState)
     .then((validationError) => {
       if (validationError) {
         let errorMessage = 'errorNotValidUrl';
-        if (validationError.message.startsWith('this must not be one of')) {
+        if (validationError.code.startsWith('exists')) {
           errorMessage = 'errorAlreadyExists';
         }
-        if (validationError.message.startsWith('this is a required')) {
+        if (validationError.code.startsWith('required')) {
           errorMessage = 'errorEmptyInput';
         }
         watchedState.form = { ...watchedState.form, isValid: false, error: errorMessage };
