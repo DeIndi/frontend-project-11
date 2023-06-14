@@ -12,10 +12,10 @@ export default {
     view: 'Просмотр',
     fullArticle: 'Читать полностью',
     errors: {
-      errorAlreadyExists: 'RSS уже существует',
-      errorEmptyInput: 'Не должно быть пустым',
+      validationError_exists: 'RSS уже существует',
+      validationError_required: 'Не должно быть пустым',
       errorNetwork: 'Ошибка сети',
-      errorNotValidUrl: 'Ссылка должна быть валидным URL',
+      validationError_url: 'Ссылка должна быть валидным URL',
       errorNoValidRss: 'Ресурс не содержит валидный RSS',
     },
   },

@@ -120,24 +120,19 @@ const validateFeedUrl = (feedUrl, watchedState) => validate(feedUrl, watchedStat
     return error;
   });
 
-const handleSubmitForm = (event, watchedState) => {
+const handleSubmitForm = (watchedState, event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
   const input = formData.get('url');
+  console.log('input: ', input);
   validateFeedUrl(input, watchedState)
     .then((validationError) => {
       if (validationError) {
-        let errorMessage = 'errorNotValidUrl';
-        if (validationError.code.startsWith('exists')) {
-          errorMessage = 'errorAlreadyExists';
-        }
-        if (validationError.code.startsWith('required')) {
-          errorMessage = 'errorEmptyInput';
-        }
+        const errorMessage = validationError.code ? `validationError_${validationError.code}` : 'errorDefault';
         watchedState.form = { ...watchedState.form, isValid: false, error: errorMessage };
       } else {
         watchedState.form = { ...watchedState.form, isValid: true, error: null };
-        loadFeed(watchedState.form.data, watchedState);
+        loadFeed(input, watchedState);
       }
     })
     .catch((error) => {
@@ -145,7 +140,7 @@ const handleSubmitForm = (event, watchedState) => {
     })
     .finally(() => {
       watchedState.loadingProcess = { status: 'idle' };
-      watchedState.form = { ...watchedState.form, data: '' };
+      watchedState.form = { ...watchedState.form };
     });
 };
 
@@ -170,7 +165,6 @@ const main = () => {
       status: 'idle',
     },
     form: {
-      data: '',
       isValid: true,
       error: null,
     },
@@ -187,11 +181,7 @@ const main = () => {
   i18Inst.init({ resources, lng: 'ru' })
     .then(() => {
       const watchedState = watch(state, i18Inst, elements);
-      elements.formInput.addEventListener('input', (e) => {
-        e.preventDefault();
-        watchedState.form.data = e.target.value;
-      });
-      elements.form.addEventListener('submit', (event) => handleSubmitForm(event, watchedState));
+      elements.form.addEventListener('submit', (event) => handleSubmitForm(watchedState, event));
       elements.posts.addEventListener('click', (event) => handlePostClick(watchedState, event));
       startRegularUpdate(watchedState);
     })

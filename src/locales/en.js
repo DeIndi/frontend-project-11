@@ -12,9 +12,11 @@ export default {
     view: 'View',
     fullArticle: 'Read full article',
     errors: {
-      errorAlreadyExists: 'RSS already exists',
-      errorEmptyInput: 'Should not be empty',
+      errorDefault: 'Неизвестная ошибка',
+      validationError_exists: 'RSS already exists',
+      validationError_required: 'Should not be empty',
       errorNetwork: 'Network error',
+      validationError_url: 'Link must be a valid URL',
       errorNotValidUrl: 'Link must be a valid URL',
       errorNoValidRss: 'Resource does not contain valid RSS',
     },
