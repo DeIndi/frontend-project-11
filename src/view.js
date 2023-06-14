@@ -22,7 +22,9 @@ const renderPosts = (state, i18Inst) => {
   return (`
   <div class="card border-0">
     <div class="card-body">
-      <h2 class="card-title h4">${i18Inst.t('posts')}</h2>
+      <h2 class="card-title h4">
+        ${i18Inst.t('posts')}
+      </h2>
     </div>
     <ul class="list-group border-0 rounded-0">
       ${state.posts.map(({ title, postId, postLink }) => `
@@ -42,11 +44,10 @@ const renderPosts = (state, i18Inst) => {
             data-id="${postId}"
             data-bs-toggle="modal"
             data-bs-target="#modal"
-           >
+          >
             ${i18Inst.t('view')}
           </button>
-        </li>
-      `).join('')}
+        </li>`).join('')}
     </ul>
   </div>
 `);
@@ -57,25 +58,25 @@ const renderFeeds = (state, i18Inst) => {
     return null;
   }
   return (`
-    <div class="card border-0">
-      <div class="card-body">
-        <h2 class="card-title h4">
-          ${i18Inst.t('feeds')}
-        </h2>
-      </div>
-      <ul class="list-group border-0 rounded-0">
-        ${state.feeds.map(({ title, desc }) => `
-          <li class="list-group-item border-0 border-end-0">
-            <h3 class="h6 m-0">
-              ${title}
-            </h3>
-            <p class="m-0 small text-black-50">
-              ${desc}
-            </p>
-          </li>
-        `).join('')}
-      </ul>
-    </div>`);
+  <div class="card border-0">
+    <div class="card-body">
+      <h2 class="card-title h4">
+        ${i18Inst.t('feeds')}
+      </h2>
+    </div>
+    <ul class="list-group border-0 rounded-0">
+      ${state.feeds.map(({ title, desc }) => `
+        <li class="list-group-item border-0 border-end-0">
+          <h3 class="h6 m-0">
+            ${title}
+          </h3>
+          <p class="m-0 small text-black-50">
+            ${desc}
+          </p>
+        </li>
+      `).join('')}
+    </ul>
+  </div>`);
 };
 
 const handleForm = (state, elements, i18Inst) => {
