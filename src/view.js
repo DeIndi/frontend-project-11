@@ -153,12 +153,6 @@ const dispatch = (state, i18Instance, elements, path = '') => {
   }
 };
 
-const wrapRender = (state, elements, i18Instance) => ((path) => {
+export default (state, i18Instance, elements) => onChange(state, (path) => {
   dispatch(state, i18Instance, elements, path);
 });
-
-export default (state, i18Instance, elements) => onChange(state, wrapRender(
-  state,
-  elements,
-  i18Instance,
-));
