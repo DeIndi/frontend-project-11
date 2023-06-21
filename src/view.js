@@ -76,7 +76,8 @@ const renderFeeds = (state, i18Inst) => {
         </li>
       `).join('')}
     </ul>
-  </div>`);
+  </div>
+`);
 };
 
 const handleForm = (state, elements, i18Inst) => {

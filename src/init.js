@@ -61,9 +61,6 @@ const loadFeed = (link, state) => {
   state.loadingProcess.status = 'loading';
   return axios.get(proxifyLink(link))
     .then((response) => {
-      if (!response.data) {
-        throw new Error("Can't be loaded!");
-      }
       const { title, desc, posts } = parseRss(response.data, state);
       const feedId = _.uniqueId();
       state.feeds.push({
@@ -83,10 +80,7 @@ const loadFeed = (link, state) => {
 };
 
 const updateFeed = (link, state) => axios.get(proxifyLink(link))
-  .then((response) => {
-    if (response.data) return response.data;
-    throw new Error("Can't be loaded!");
-  })
+  .then((response) => response.data)
   .then((data) => {
     if (!data.contents) {
       return;
