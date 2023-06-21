@@ -20,36 +20,36 @@ const renderPosts = (state, i18Instance) => {
     return null;
   }
   return (`
-  <div class="card border-0">
-    <div class="card-body">
-      <h2 class="card-title h4">
-        ${i18Instance.t('posts')}
-      </h2>
+    <div class="card border-0">
+      <div class="card-body">
+        <h2 class="card-title h4">
+          ${i18Instance.t('posts')}
+        </h2>
+      </div>
+      <ul class="list-group border-0 rounded-0">
+        ${state.posts.map(({ title, postId, postLink }) => `
+          <li class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
+            <a
+              href="${postLink}"
+              class="${state.uiState.viewedPosts.has(postId) ? 'fw-normal' : 'fw-bold'}"
+              data-id="${postId}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ${title}
+            </a>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              data-id="${postId}"
+              data-bs-toggle="modal"
+              data-bs-target="#modal"
+            >
+              ${i18Instance.t('view')}
+            </button>
+          </li>`).join('')}
+      </ul>
     </div>
-    <ul class="list-group border-0 rounded-0">
-      ${state.posts.map(({ title, postId, postLink }) => `
-        <li class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
-          <a
-            href="${postLink}"
-            class="${state.uiState.viewedPosts.has(postId) ? 'fw-normal' : 'fw-bold'}"
-            data-id="${postId}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            ${title}
-          </a>
-          <button
-            type="button"
-            class="btn btn-outline-primary btn-sm"
-            data-id="${postId}"
-            data-bs-toggle="modal"
-            data-bs-target="#modal"
-          >
-            ${i18Instance.t('view')}
-          </button>
-        </li>`).join('')}
-    </ul>
-  </div>
 `);
 };
 
@@ -58,25 +58,25 @@ const renderFeeds = (state, i18Instance) => {
     return null;
   }
   return (`
-  <div class="card border-0">
-    <div class="card-body">
-      <h2 class="card-title h4">
-        ${i18Instance.t('feeds')}
-      </h2>
+    <div class="card border-0">
+      <div class="card-body">
+        <h2 class="card-title h4">
+          ${i18Instance.t('feeds')}
+        </h2>
+      </div>
+      <ul class="list-group border-0 rounded-0">
+        ${state.feeds.map(({ title, desc }) => `
+          <li class="list-group-item border-0 border-end-0">
+            <h3 class="h6 m-0">
+              ${title}
+            </h3>
+            <p class="m-0 small text-black-50">
+              ${desc}
+            </p>
+          </li>
+        `).join('')}
+      </ul>
     </div>
-    <ul class="list-group border-0 rounded-0">
-      ${state.feeds.map(({ title, desc }) => `
-        <li class="list-group-item border-0 border-end-0">
-          <h3 class="h6 m-0">
-            ${title}
-          </h3>
-          <p class="m-0 small text-black-50">
-            ${desc}
-          </p>
-        </li>
-      `).join('')}
-    </ul>
-  </div>
 `);
 };
 
