@@ -15,7 +15,7 @@ const renderFeedback = (elements, feedbackType, message) => {
   feedbackMessage.classList.add(`text-${feedbackType}`);
 };
 
-const renderPosts = (state, i18Inst) => {
+const renderPosts = (state, i18Instance) => {
   if (state.posts.length <= 0) {
     return null;
   }
@@ -23,7 +23,7 @@ const renderPosts = (state, i18Inst) => {
   <div class="card border-0">
     <div class="card-body">
       <h2 class="card-title h4">
-        ${i18Inst.t('posts')}
+        ${i18Instance.t('posts')}
       </h2>
     </div>
     <ul class="list-group border-0 rounded-0">
@@ -45,7 +45,7 @@ const renderPosts = (state, i18Inst) => {
             data-bs-toggle="modal"
             data-bs-target="#modal"
           >
-            ${i18Inst.t('view')}
+            ${i18Instance.t('view')}
           </button>
         </li>`).join('')}
     </ul>
@@ -53,7 +53,7 @@ const renderPosts = (state, i18Inst) => {
 `);
 };
 
-const renderFeeds = (state, i18Inst) => {
+const renderFeeds = (state, i18Instance) => {
   if (state.feeds.length <= 0) {
     return null;
   }
@@ -61,7 +61,7 @@ const renderFeeds = (state, i18Inst) => {
   <div class="card border-0">
     <div class="card-body">
       <h2 class="card-title h4">
-        ${i18Inst.t('feeds')}
+        ${i18Instance.t('feeds')}
       </h2>
     </div>
     <ul class="list-group border-0 rounded-0">
@@ -80,31 +80,29 @@ const renderFeeds = (state, i18Inst) => {
 `);
 };
 
-const handleForm = (state, elements, i18Inst) => {
+const handleForm = (state, elements, i18Instance) => {
   const { isValid } = state.form;
-  console.log('state.form', state.form);
   if (isValid) {
     elements.formInput.classList.remove('is-invalid');
   } else {
     elements.formInput.classList.add('is-invalid');
-    renderFeedback(elements, 'danger', i18Inst.t(`errors.${state.form.error}`));
+    renderFeedback(elements, 'danger', i18Instance.t(`errors.${state.form.error}`));
   }
 };
 
-const handleLoadingProcess = (state, elements, i18Inst) => {
+const handleLoadingProcess = (state, elements, i18Instance) => {
   switch (state.loadingProcess.status) {
     case 'idle':
       elements.formInput.value = '';
       elements.formSubmit.disabled = false;
       break;
     case 'success':
-      renderFeedback(elements, 'success', i18Inst.t('rssLoadingSuccess'));
+      renderFeedback(elements, 'success', i18Instance.t('rssLoadingSuccess'));
       elements.formInput.focus();
       elements.formSubmit.disabled = false;
       break;
     case 'fail':
-      console.log('state.form.error: ', state.loadingProcess);
-      renderFeedback(elements, 'danger', i18Inst.t(`errors.${state.loadingProcess.error}`));
+      renderFeedback(elements, 'danger', i18Instance.t(`errors.${state.loadingProcess.error}`));
       elements.formSubmit.disabled = false;
       break;
     case 'loading':
@@ -116,7 +114,7 @@ const handleLoadingProcess = (state, elements, i18Inst) => {
   }
 };
 
-const handleModal = (state, elements, i18Inst) => {
+const handleModal = (state, elements, i18Instance) => {
   const activePost = state.posts.find((post) => post.postId === state.modal.activePostId);
   if (!activePost) {
     return null;
@@ -125,38 +123,42 @@ const handleModal = (state, elements, i18Inst) => {
   elements.modalHeader.innerHTML = title;
   elements.modalBody.innerHTML = description;
   elements.fullArticle.href = postLink;
-  elements.fullArticle.innerHTML = i18Inst.t('fullArticle');
+  elements.fullArticle.innerHTML = i18Instance.t('fullArticle');
   return null;
 };
 
-const handleFeedsSection = (state, elements, i18Inst) => {
-  elements.feeds.innerHTML = renderFeeds(state, i18Inst);
+const handleFeedsSection = (state, elements, i18Instance) => {
+  elements.feeds.innerHTML = renderFeeds(state, i18Instance);
 };
 
-const handlePostsSection = (state, elements, i18Inst) => {
-  elements.posts.innerHTML = renderPosts(state, i18Inst);
+const handlePostsSection = (state, elements, i18Instance) => {
+  elements.posts.innerHTML = renderPosts(state, i18Instance);
 };
 
-const dispatch = (state, i18Inst, elements, path = '') => {
+const dispatch = (state, i18Instance, elements, path = '') => {
   if (path.startsWith('loadingProcess')) {
-    handleLoadingProcess(state, elements, i18Inst);
+    handleLoadingProcess(state, elements, i18Instance);
   }
   if (path.startsWith('form')) {
-    handleForm(state, elements, i18Inst);
+    handleForm(state, elements, i18Instance);
   }
   if (path.startsWith('feeds')) {
-    handleFeedsSection(state, elements, i18Inst);
+    handleFeedsSection(state, elements, i18Instance);
   }
   if (path.startsWith('posts') || path.startsWith('uiState')) {
-    handlePostsSection(state, elements, i18Inst);
+    handlePostsSection(state, elements, i18Instance);
   }
   if (path.startsWith('modal')) {
-    handleModal(state, elements, i18Inst);
+    handleModal(state, elements, i18Instance);
   }
 };
 
-const wrapRender = (state, elements, i18Inst) => ((path) => {
-  dispatch(state, i18Inst, elements, path);
+const wrapRender = (state, elements, i18Instance) => ((path) => {
+  dispatch(state, i18Instance, elements, path);
 });
 
-export default (state, i18Inst, elements) => onChange(state, wrapRender(state, elements, i18Inst));
+export default (state, i18Instance, elements) => onChange(state, wrapRender(
+  state,
+  elements,
+  i18Instance,
+));

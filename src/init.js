@@ -73,9 +73,7 @@ const loadFeed = (link, state) => {
       if (networkErrorCodes.includes(error.code)) {
         error.code = 'errorNetwork';
       }
-      console.log('entering catch');
       state.loadingProcess = { status: 'fail', error: error.code };
-      console.log('new state.loadingProcess: ', state.loadingProcess);
     });
 };
 
@@ -89,9 +87,6 @@ const updateFeed = (link, state) => axios.get(proxifyLink(link))
     state.posts = [...state.posts, ...posts.filter(
       (post) => !state.posts.find((oldPost) => oldPost.postLink === post.postLink),
     )];
-  })
-  .catch((error) => {
-    throw error;
   });
 
 const startRegularUpdate = (state) => {
@@ -110,7 +105,6 @@ const validateFeedUrl = (feedUrl, watchedState) => validate(feedUrl, watchedStat
   .then(() => null)
   .catch((error) => {
     error.code = error.message;
-    console.log('validation error: ', error);
     return error;
   });
 
@@ -118,7 +112,6 @@ const handleSubmitForm = (watchedState, event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
   const input = formData.get('url');
-  console.log('input: ', input);
   validateFeedUrl(input, watchedState)
     .then((validationError) => {
       if (validationError) {
@@ -153,7 +146,7 @@ const main = () => {
     modalBody: document.querySelector('.modal-body'),
   };
   const state = {
-    language: 'en',
+    language: 'ru',
     loadingProcess: {
       error: null,
       status: 'idle',
@@ -171,10 +164,10 @@ const main = () => {
       viewedPosts: new Set(),
     },
   };
-  const i18Inst = i18n.createInstance();
-  i18Inst.init({ resources, lng: 'ru' })
+  const i18Instance = i18n.createInstance();
+  i18Instance.init({ resources, lng: 'ru' })
     .then(() => {
-      const watchedState = watch(state, i18Inst, elements);
+      const watchedState = watch(state, i18Instance, elements);
       elements.form.addEventListener('submit', (event) => handleSubmitForm(watchedState, event));
       elements.posts.addEventListener('click', (event) => handlePostClick(watchedState, event));
       startRegularUpdate(watchedState);
