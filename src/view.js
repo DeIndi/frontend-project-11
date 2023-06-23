@@ -50,7 +50,7 @@ const renderPosts = (state, i18Instance) => {
           </li>`).join('')}
       </ul>
     </div>
-`);
+  `);
 };
 
 const renderFeeds = (state, i18Instance) => {
@@ -77,7 +77,7 @@ const renderFeeds = (state, i18Instance) => {
         `).join('')}
       </ul>
     </div>
-`);
+  `);
 };
 
 const handleForm = (state, elements, i18Instance) => {

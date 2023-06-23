@@ -10,7 +10,6 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin'; // eslint-disable-li
 const __filename = fileURLToPath(import.meta.url);
 // eslint-disable-next-line no-underscore-dangle
 const __dirname = dirname(__filename);
-const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
   entry: './src/index.js',
@@ -18,6 +17,7 @@ const config = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
   },
+  mode: process.env.NODE_ENV ?? 'development',
   devServer: {
     open: true,
     host: 'localhost',
@@ -62,11 +62,4 @@ const config = {
   },
 };
 
-export default () => {
-  if (isProduction) {
-    config.mode = 'production';
-  } else {
-    config.mode = 'development';
-  }
-  return config;
-};
+export default () => config;

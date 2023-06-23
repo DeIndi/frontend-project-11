@@ -12,6 +12,7 @@ export default {
     view: 'Просмотр',
     fullArticle: 'Читать полностью',
     errors: {
+      errorDefault: 'Unknown error',
       validationError_exists: 'RSS уже существует',
       validationError_required: 'Не должно быть пустым',
       errorNetwork: 'Ошибка сети',

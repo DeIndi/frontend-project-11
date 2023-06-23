@@ -8,7 +8,7 @@ export default {
     posts: 'Posts',
     announcement: "Start reading RSS today! It's easy, it's nice.",
     rssAggregator: 'RSS Aggregator',
-    feedbackPositive: 'RSS loaded successfully',
+    rssLoadingSuccess: 'RSS loaded successfully',
     view: 'View',
     fullArticle: 'Read full article',
     errors: {
@@ -17,7 +17,6 @@ export default {
       validationError_required: 'Should not be empty',
       errorNetwork: 'Network error',
       validationError_url: 'Link must be a valid URL',
-      errorNotValidUrl: 'Link must be a valid URL',
       errorNoValidRss: 'Resource does not contain valid RSS',
     },
   },
