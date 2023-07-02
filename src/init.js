@@ -12,19 +12,19 @@ const updateTimeout = 5000;
 
 const validate = (url, feeds) => {
   const schema = yup.string().trim().required('required').url('url')
-    .notOneOf(feeds.map((f) => f.link), 'exists');
+    .notOneOf((feeds ?? []).map((f) => f.link), 'exists');
   return schema
     .validate(url, { abortEarly: false });
 };
 
-const proxifyLink = (link) => `${proxyServer}get?url=${encodeURIComponent(link)}&disableCache=true`;
+const proxifyLink = (link) => new URL(`${proxyServer}get?url=${encodeURIComponent(link)}&disableCache=true`);
 
 const parseRss = (data) => {
   const parser = new DOMParser();
   const rssDOM = parser.parseFromString(data.contents, 'text/xml');
   const errorNode = rssDOM.querySelector('parsererror');
   if (errorNode) {
-    const error = new Error('Incorrect document type');
+    const error = new Error(errorNode.textContent);
     error.code = 'errorNoValidRss';
     throw error;
   }
@@ -33,7 +33,6 @@ const parseRss = (data) => {
   const desc = rssDOM.querySelector('description');
   const items = channel.querySelectorAll('item');
   const posts = [...items].map((item) => ({
-    postId: _.uniqueId(),
     title: item.querySelector('title').textContent,
     description: item.querySelector('description').textContent,
     postLink: item.querySelector('link').textContent,
@@ -66,7 +65,7 @@ const loadFeed = (link, state) => {
       state.feeds.push({
         feedId, title: title.textContent, desc: desc.textContent, link,
       });
-      state.posts.push(...posts);
+      state.posts.push(...posts.map((post) => ({ ...post, postId: _.uniqueId() })));
       state.loadingProcess = { status: 'success' };
     })
     .catch((error) => {
@@ -78,16 +77,16 @@ const loadFeed = (link, state) => {
 };
 
 const updateFeed = (link, state) => axios.get(proxifyLink(link))
-  .then((response) => response.data)
-  .then((data) => {
-    if (!data.contents) {
+  .then((response) => {
+    if (!response.data?.contents) {
       return;
     }
-    const { posts } = parseRss(data);
+    const { posts } = parseRss(response.data);
     state.posts = [...state.posts, ...posts.filter(
       (post) => !state.posts.find((oldPost) => oldPost.postLink === post.postLink),
     )];
-  });
+  })
+  .catch(console.error);
 
 const startRegularUpdate = (state) => {
   const checkFeeds = () => {
@@ -112,7 +111,7 @@ const handleSubmitForm = (watchedState, event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
   const input = formData.get('url');
-  validateFeedUrl(input, watchedState)
+  validateFeedUrl(input, watchedState.feeds)
     .then((validationError) => {
       if (validationError) {
         const errorMessage = validationError.code ? `validationError_${validationError.code}` : 'errorDefault';

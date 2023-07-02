@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import DOMPurify from 'dompurify';
 
 const removeClassStartsWith = (node, classNamePrefix) => {
   [...node.classList].forEach((className) => {
@@ -19,6 +20,12 @@ const renderPosts = (state, i18Instance) => {
   if (state.posts.length <= 0) {
     return null;
   }
+  const sanitizedPosts = state.posts.map(({ title, postId, postLink }) => {
+    const sanitizedTitle = DOMPurify.sanitize(title);
+    const sanitizedPostId = DOMPurify.sanitize(postId);
+    const sanitizedPostLink = DOMPurify.sanitize(postLink);
+    return { sanitizedTitle, sanitizedPostId, sanitizedPostLink };
+  });
   return (`
     <div class="card border-0">
       <div class="card-body">
@@ -27,21 +34,21 @@ const renderPosts = (state, i18Instance) => {
         </h2>
       </div>
       <ul class="list-group border-0 rounded-0">
-        ${state.posts.map(({ title, postId, postLink }) => `
+        ${sanitizedPosts.map(({ sanitizedTitle, sanitizedPostId, sanitizedPostLink }) => `
           <li class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
             <a
-              href="${postLink}"
-              class="${state.uiState.viewedPosts.has(postId) ? 'fw-normal' : 'fw-bold'}"
-              data-id="${postId}"
+              href="${sanitizedPostLink}"
+              class="${state.uiState.viewedPosts.has(sanitizedPostId) ? 'fw-normal' : 'fw-bold'}"
+              data-id="${sanitizedPostId}"
               target="_blank"
               rel="noopener noreferrer"
             >
-              ${title}
+              ${sanitizedTitle}
             </a>
             <button
               type="button"
               class="btn btn-outline-primary btn-sm"
-              data-id="${postId}"
+              data-id="${sanitizedPostId}"
               data-bs-toggle="modal"
               data-bs-target="#modal"
             >
@@ -61,17 +68,17 @@ const renderFeeds = (state, i18Instance) => {
     <div class="card border-0">
       <div class="card-body">
         <h2 class="card-title h4">
-          ${i18Instance.t('feeds')}
+          ${DOMPurify.sanitize(i18Instance.t('feeds'))}
         </h2>
       </div>
       <ul class="list-group border-0 rounded-0">
         ${state.feeds.map(({ title, desc }) => `
           <li class="list-group-item border-0 border-end-0">
             <h3 class="h6 m-0">
-              ${title}
+              ${DOMPurify.sanitize(title)}
             </h3>
             <p class="m-0 small text-black-50">
-              ${desc}
+              ${DOMPurify.sanitize(desc)}
             </p>
           </li>
         `).join('')}
@@ -120,10 +127,10 @@ const handleModal = (state, elements, i18Instance) => {
     return null;
   }
   const { title, description, postLink } = activePost;
-  elements.modalHeader.innerHTML = title;
-  elements.modalBody.innerHTML = description;
-  elements.fullArticle.href = postLink;
-  elements.fullArticle.innerHTML = i18Instance.t('fullArticle');
+  elements.modalHeader.innerHTML = DOMPurify.sanitize(title);
+  elements.modalBody.innerHTML = DOMPurify.sanitize(description);
+  elements.fullArticle.href = DOMPurify.sanitize(postLink);
+  elements.fullArticle.innerHTML = DOMPurify.sanitize(i18Instance.t('fullArticle'));
   return null;
 };
 

@@ -1,7 +1,7 @@
 # "RSS Loader" Project
 
 [![Actions Status](https://github.com/DeIndi/frontend-project-11/workflows/hexlet-check/badge.svg)](https://github.com/DeIndi/frontend-project-11/actions)
-[![front11.js CI](https://github.com/DeIndi/frontend-project-11/actions/workflows/front11.js.yml/badge.svg)](https://github.com/DeIndi/frontend-project-11/actions/workflows/front11.js.yml)
+[![node CI](https://github.com/DeIndi/frontend-project-11/actions/workflows/nodeCI.yml/badge.svg)](https://github.com/DeIndi/frontend-project-11/actions/workflows/nodeCI.yml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/27ff25bb731f8ca6695f/maintainability)](https://codeclimate.com/github/DeIndi/frontend-project-11/maintainability)
 
 Third frontend project out of four.
