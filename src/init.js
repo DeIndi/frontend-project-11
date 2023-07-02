@@ -111,7 +111,7 @@ const handleSubmitForm = (watchedState, event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
   const input = formData.get('url');
-  validateFeedUrl(input, watchedState.feeds)
+  validateFeedUrl(input, watchedState)
     .then((validationError) => {
       if (validationError) {
         const errorMessage = validationError.code ? `validationError_${validationError.code}` : 'errorDefault';
