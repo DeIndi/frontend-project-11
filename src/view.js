@@ -16,6 +16,29 @@ const renderFeedback = (elements, feedbackType, message) => {
   feedbackMessage.classList.add(`text-${feedbackType}`);
 };
 
+const renderPost = (state, i18Instance, { sanitizedTitle, sanitizedPostId, sanitizedPostLink }) => `
+  <li class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
+    <a
+      href="${sanitizedPostLink}"
+      class="${state.uiState.viewedPosts.has(sanitizedPostId) ? 'fw-normal' : 'fw-bold'}"
+      data-id="${sanitizedPostId}"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+    ${sanitizedTitle}
+    </a>
+    <button
+      type="button"
+      class="btn btn-outline-primary btn-sm"
+      data-id="${sanitizedPostId}"
+      data-bs-toggle="modal"
+      data-bs-target="#modal"
+    >
+      ${i18Instance.t('view')}
+    </button>
+  </li>
+`;
+
 const renderPosts = (state, i18Instance) => {
   if (state.posts.length <= 0) {
     return null;
@@ -34,27 +57,7 @@ const renderPosts = (state, i18Instance) => {
         </h2>
       </div>
       <ul class="list-group border-0 rounded-0">
-        ${sanitizedPosts.map(({ sanitizedTitle, sanitizedPostId, sanitizedPostLink }) => `
-          <li class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
-            <a
-              href="${sanitizedPostLink}"
-              class="${state.uiState.viewedPosts.has(sanitizedPostId) ? 'fw-normal' : 'fw-bold'}"
-              data-id="${sanitizedPostId}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ${sanitizedTitle}
-            </a>
-            <button
-              type="button"
-              class="btn btn-outline-primary btn-sm"
-              data-id="${sanitizedPostId}"
-              data-bs-toggle="modal"
-              data-bs-target="#modal"
-            >
-              ${i18Instance.t('view')}
-            </button>
-          </li>`).join('')}
+        ${sanitizedPosts.map((sanitizedPost) => renderPost(state, i18Instance, sanitizedPost)).join('')}
       </ul>
     </div>
   `);
