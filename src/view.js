@@ -1,5 +1,5 @@
 import onChange from 'on-change';
-import DOMPurify from 'dompurify';
+import { sanitize } from 'dompurify';
 
 const removeClassStartsWith = (node, classNamePrefix) => {
   [...node.classList].forEach((className) => {
@@ -16,21 +16,21 @@ const renderFeedback = (elements, feedbackType, message) => {
   feedbackMessage.classList.add(`text-${feedbackType}`);
 };
 
-const renderPost = (state, i18Instance, { sanitizedTitle, sanitizedPostId, sanitizedPostLink }) => `
+const renderPost = (state, i18Instance, { title, postId, postLink }) => `
   <li class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
     <a
-      href="${sanitizedPostLink}"
-      class="${state.uiState.viewedPosts.has(sanitizedPostId) ? 'fw-normal' : 'fw-bold'}"
-      data-id="${sanitizedPostId}"
+      href="${sanitize(postLink)}"
+      class="${state.uiState.viewedPosts.has(sanitize(postId)) ? 'fw-normal' : 'fw-bold'}"
+      data-id="${sanitize(postId)}"
       target="_blank"
       rel="noopener noreferrer"
     >
-    ${sanitizedTitle}
+    ${title}
     </a>
     <button
       type="button"
       class="btn btn-outline-primary btn-sm"
-      data-id="${sanitizedPostId}"
+      data-id="${sanitize(postId)}"
       data-bs-toggle="modal"
       data-bs-target="#modal"
     >
@@ -43,12 +43,6 @@ const renderPosts = (state, i18Instance) => {
   if (state.posts.length <= 0) {
     return null;
   }
-  const sanitizedPosts = state.posts.map(({ title, postId, postLink }) => {
-    const sanitizedTitle = DOMPurify.sanitize(title);
-    const sanitizedPostId = DOMPurify.sanitize(postId);
-    const sanitizedPostLink = DOMPurify.sanitize(postLink);
-    return { sanitizedTitle, sanitizedPostId, sanitizedPostLink };
-  });
   return (`
     <div class="card border-0">
       <div class="card-body">
@@ -57,7 +51,7 @@ const renderPosts = (state, i18Instance) => {
         </h2>
       </div>
       <ul class="list-group border-0 rounded-0">
-        ${sanitizedPosts.map((sanitizedPost) => renderPost(state, i18Instance, sanitizedPost)).join('')}
+        ${state.posts.map((post) => renderPost(state, i18Instance, post)).join('')}
       </ul>
     </div>
   `);
@@ -71,17 +65,17 @@ const renderFeeds = (state, i18Instance) => {
     <div class="card border-0">
       <div class="card-body">
         <h2 class="card-title h4">
-          ${DOMPurify.sanitize(i18Instance.t('feeds'))}
+          ${sanitize(i18Instance.t('feeds'))}
         </h2>
       </div>
       <ul class="list-group border-0 rounded-0">
         ${state.feeds.map(({ title, desc }) => `
           <li class="list-group-item border-0 border-end-0">
             <h3 class="h6 m-0">
-              ${DOMPurify.sanitize(title)}
+              ${sanitize(title)}
             </h3>
             <p class="m-0 small text-black-50">
-              ${DOMPurify.sanitize(desc)}
+              ${sanitize(desc)}
             </p>
           </li>
         `).join('')}
@@ -130,10 +124,10 @@ const handleModal = (state, elements, i18Instance) => {
     return null;
   }
   const { title, description, postLink } = activePost;
-  elements.modalHeader.innerHTML = DOMPurify.sanitize(title);
-  elements.modalBody.innerHTML = DOMPurify.sanitize(description);
-  elements.fullArticle.href = DOMPurify.sanitize(postLink);
-  elements.fullArticle.innerHTML = DOMPurify.sanitize(i18Instance.t('fullArticle'));
+  elements.modalHeader.innerHTML = sanitize(title);
+  elements.modalBody.innerHTML = sanitize(description);
+  elements.fullArticle.href = sanitize(postLink);
+  elements.fullArticle.innerHTML = sanitize(i18Instance.t('fullArticle'));
   return null;
 };
 
