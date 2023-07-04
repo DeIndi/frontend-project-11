@@ -21,7 +21,7 @@ const renderPost = (state, i18Instance, { title, postId, postLink }) => `
     <a
       href="${sanitize(postLink)}"
       class="${state.uiState.viewedPosts.has(sanitize(postId)) ? 'fw-normal' : 'fw-bold'}"
-      data-id="${sanitize(postId)}"
+      data-id="${postId}"
       target="_blank"
       rel="noopener noreferrer"
     >
