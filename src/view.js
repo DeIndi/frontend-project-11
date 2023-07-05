@@ -20,7 +20,7 @@ const renderPost = (state, i18Instance, { title, postId, postLink }) => `
   <li class="list-group-item post-item d-flex justify-content-between align-items-start border-0 border-end-0">
     <a
       href="${sanitize(postLink)}"
-      class="${state.uiState.viewedPosts.has(sanitize(postId)) ? 'fw-normal' : 'fw-bold'}"
+      class="${state.uiState.viewedPosts.has(postId) ? 'fw-normal' : 'fw-bold'}"
       data-id="${postId}"
       target="_blank"
       rel="noopener noreferrer"
@@ -30,7 +30,7 @@ const renderPost = (state, i18Instance, { title, postId, postLink }) => `
     <button
       type="button"
       class="btn btn-outline-primary btn-sm"
-      data-id="${sanitize(postId)}"
+      data-id="${postId}"
       data-bs-toggle="modal"
       data-bs-target="#modal"
     >
