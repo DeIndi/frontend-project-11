@@ -132,11 +132,11 @@ const handleModal = (state, elements, i18Instance) => {
 };
 
 const handleFeedsSection = (state, elements, i18Instance) => {
-  elements.feeds.innerHTML = renderFeeds(state, i18Instance);
+  elements.feeds.innerText = renderFeeds(state, i18Instance);
 };
 
 const handlePostsSection = (state, elements, i18Instance) => {
-  elements.posts.innerHTML = renderPosts(state, i18Instance);
+  elements.posts.innerText = renderPosts(state, i18Instance);
 };
 
 const dispatch = (state, i18Instance, elements, path = '') => {
