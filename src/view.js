@@ -124,10 +124,10 @@ const handleModal = (state, elements, i18Instance) => {
     return null;
   }
   const { title, description, postLink } = activePost;
-  elements.modalHeader.innerText = sanitize(title);
-  elements.modalBody.innerText = sanitize(description);
-  elements.fullArticle.href = sanitize(postLink);
-  elements.fullArticle.innerText = sanitize(i18Instance.t('fullArticle'));
+  elements.modalHeader.innerText = title;
+  elements.modalBody.innerText = description;
+  elements.fullArticle.href = postLink;
+  elements.fullArticle.innerText = i18Instance.t('fullArticle');
   return null;
 };
 
